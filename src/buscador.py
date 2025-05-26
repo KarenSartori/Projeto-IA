@@ -11,6 +11,7 @@ def log(msg="", end="\n"):
     with open("resultado_busca.txt", "a", encoding="utf-8") as f:
         f.write(str(msg) + end)
 
+# o custo final do caminho é 1 ou o custo da celular
 def custo_real(celula):
     custo = 0
     for tipo in celula.tipos:
@@ -54,13 +55,18 @@ def a_star(inicio, objetivo, mapa):
     # heapq organiza os nós com menor valor no topo
     heapq.heappush(open_list, (0, inicio))
     closed_list = []
+    closed_set = set()
 
     g = {inicio: 0}
     f = {inicio: calcular_heuristica(inicio, objetivo)}
+
+    # caminho funciona como dicioanrio pra guardar os estados e os anteriores dele
+    # fica tipo { (1,0): (0,0) }
     caminho = {}
 
     while open_list:
         os.system('cls' if os.name == 'nt' else 'clear')
+        # pega o nó de menor valor
         _, atual = heapq.heappop(open_list)
 
         log(f"\nVisitando: ({atual.x}, {atual.y})")
@@ -70,7 +76,8 @@ def a_star(inicio, objetivo, mapa):
         log(f"  - h(n): {h_val}")
         log(f"  - f(n): {round(g[atual] + h_val, 1)}")
         # add na lista de closed
-        closed_list.append(atual)
+        closed_list.append(atual)  # visualização
+        closed_set.add(atual)  # lógica de controle
 
         mapa_visual = [["".join(t.value for t in cel.tipos) if cel.tipos else "." for cel in linha] for linha in mapa]
         for celula in closed_list:
@@ -78,6 +85,7 @@ def a_star(inicio, objetivo, mapa):
         mapa_visual[atual.x][atual.y] = "S"
         exibir_mapa_console(mapa_visual)
 
+        # pega os adjacentes do estado
         vizinhos = get_vizinhos(atual, mapa)
         heuristicas = []
         for viz in vizinhos:
@@ -91,10 +99,11 @@ def a_star(inicio, objetivo, mapa):
             log(f"  ({x}, {y}) -> h(n) = {round(h, 2)}")
 
         for vizinho in vizinhos:
-            if vizinho in closed_list:
+            if vizinho in closed_set:
                 continue
 
             # g_novo = g[atual] + custo_real(vizinho)
+            # o g é o custo de um estado ao outro
             g_novo = g[atual] + 1
             h = calcular_heuristica(vizinho, objetivo)
             f_novo = g_novo + h
