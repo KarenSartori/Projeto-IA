@@ -1,9 +1,9 @@
 import heapq
 import os
 from heuristica import calcular_heuristica
-from mapa import exibir_mapa_txt
+from mapaMedio import exibir_mapa_txt
 from celula import TipoCelula
-from mapa import exibir_mapa_console
+from mapaMedio import exibir_mapa_console
 
 # coloquei um arq .txt pra ver se ta certo os calculos
 def log(msg="", end="\n"):
@@ -51,9 +51,13 @@ def a_star(inicio, objetivo, mapa):
         f.write(exibir_mapa_txt(mapa))
         f.write("\n")
 
+    ordem_abertura = []
     open_list = []
     # heapq organiza os nós com menor valor no topo
-    heapq.heappush(open_list, (0, inicio))
+    contador = 0
+    heapq.heappush(open_list, (0, contador, inicio))
+    ordem_abertura.append(inicio)
+
     closed_list = []
     closed_set = set()
 
@@ -67,7 +71,7 @@ def a_star(inicio, objetivo, mapa):
     while open_list:
         os.system('cls' if os.name == 'nt' else 'clear')
         # pega o nó de menor valor
-        _, atual = heapq.heappop(open_list)
+        _, _, atual = heapq.heappop(open_list)
 
         log(f"\nVisitando: ({atual.x}, {atual.y})")
         log(f"  - tipos: {', '.join(t.value for t in atual.tipos)}")
@@ -112,13 +116,16 @@ def a_star(inicio, objetivo, mapa):
                 caminho[vizinho] = atual
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
-                heapq.heappush(open_list, (f_novo, vizinho))
+                contador += 1
+                heapq.heappush(open_list, (f_novo, contador, vizinho))
+                ordem_abertura.append(vizinho)
 
-        log("\nLISTA DE OPEN (com f(n) = g(n) + h(n)):")
-        for f_score, n in sorted(open_list, key=lambda x: x[0]):
-            g_val = g.get(n, '?')
-            h_val = calcular_heuristica(n, objetivo)
-            log(f"  ({n.x}, {n.y}) -> f(n) = {g_val} + {round(h_val, 2)} = {round(g_val + h_val, 2)}")
+        log("\nLISTA DE OPEN (na ordem de inserção):")
+        for cel in ordem_abertura:
+            if cel not in closed_set:
+                g_val = g.get(cel, '?')
+                h_val = calcular_heuristica(cel, objetivo)
+                log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val} + {round(h_val, 2)} = {round(g_val + h_val, 2)}")
 
         log("LISTA DE CLOSED: " + str([f"({n.x}, {n.y})" for n in closed_list]))
         log("-" * 40)

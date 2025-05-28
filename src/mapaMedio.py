@@ -1,28 +1,31 @@
 from celula import Celula, TipoCelula
 
-TAMANHO = 8
-
+TAMANHO = 7
 
 def gerar_mapa():
     matriz = [[Celula(x, y) for y in range(TAMANHO)] for x in range(TAMANHO)]
 
     # Entrada e objetivo
     matriz[0][0].adicionar_tipo(TipoCelula.ENTRADA)
-    matriz[7][7].adicionar_tipo(TipoCelula.JOIA)
+    matriz[6][6].adicionar_tipo(TipoCelula.JOIA)
 
-    # Obstáculos
+    # Obstáculos (7 de cada)
     obstaculos_fixos = {
         TipoCelula.GUARDA: [
-            (1, 1), (1, 2), (2, 3), (3, 5), (5, 1), (6, 4), (5, 5)
+            (1, 1), (1, 2), (2, 3), (3, 5), (4, 6),
+            (5, 1), (6, 2)
         ],
         TipoCelula.CAMERA: [
-            (1, 3), (2, 5), (3, 6), (4, 4), (7, 3), (0, 6), (6, 2)
+            (1, 3), (2, 5), (3, 6), (4, 4), (5, 2),
+            (6, 6), (0, 6)
         ],
         TipoCelula.PORTA_TRANCADA: [
-            (0, 5), (1, 7), (3, 1), (4, 2), (6, 1), (7, 2), (2, 0)
+            (2, 0), (3, 1), (4, 2), (5, 3), (6, 0),
+            (6, 1), (0, 4)
         ],
         TipoCelula.ARMADILHA: [
-            (0, 1), (2, 2), (3, 3), (0, 7), (1, 6), (2, 7), (6, 6)
+            (0, 1), (2, 2), (3, 3), (4, 0), (5, 4),
+            (1, 6), (3, 4)
         ],
     }
 
@@ -34,9 +37,8 @@ def gerar_mapa():
 
     return matriz
 
-
 def exibir_mapa_console(matriz):
-    print("\nMapa (8x8):")
+    print("\nMapa (7x7):")
     separador = "+" + "+".join(["----"] * TAMANHO) + "+"
     for linha in matriz:
         linha_str = "|"

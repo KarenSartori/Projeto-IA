@@ -1,4 +1,4 @@
-from mapa import gerar_mapa, exibir_mapa_console
+from mapaMedio import gerar_mapa, exibir_mapa_console
 from buscador import a_star
 
 if __name__ == "__main__":
@@ -6,6 +6,6 @@ if __name__ == "__main__":
     exibir_mapa_console(mapa)
 
     inicio = mapa[0][0]
-    objetivo = mapa[4][4]
+    objetivo = mapa[6][6]
 
     caminho = a_star(inicio, objetivo, mapa)
