@@ -108,8 +108,9 @@ def a_star(inicio, objetivo, mapa):
 
             # g_novo = g[atual] + custo_real(vizinho)
             # o g é o custo de um estado ao outro
-            g_novo = g[atual] + 1
-            h = calcular_heuristica(vizinho, objetivo)
+            # g_novo = g[atual] + 1
+            h = calcular_heuristica(vizinho, objetivo, log=True)
+            g_novo = h + 1
             f_novo = g_novo + h
 
             if vizinho not in g or f_novo < f.get(vizinho, float('inf')):
@@ -138,10 +139,15 @@ def a_star(inicio, objetivo, mapa):
                 tipos = ', '.join(t.value for t in cel.tipos)
                 log(f"{i + 1:>2}. ({cel.x},{cel.y})  Tipos: {tipos}")
 
-            custo_total = g[objetivo]
-            log(f"\nCusto total da solução: {custo_total}")
+            # Soma dos g(n) de cada célula do caminho
+            custo_total = sum(g[cel] for cel in caminho_final)
+            log(f"\nCusto total da solução (soma dos g(n)): {custo_total}")
 
-            # exibe e salva o mapa final com caminho
+            # Heurística do início direto até o objetivo
+            heuristica_inicio_fim = calcular_heuristica(inicio, objetivo, log=True)
+            log(f"Heurística: ({inicio.x},{inicio.y}) até o objetivo ({objetivo.x},{objetivo.y}): {heuristica_inicio_fim}")
+
+            # Exibe e salva o mapa final com caminho
             log("\nMapa final da solução com *:")
             log(exibir_mapa_txt(mapa, caminho_final))
 
