@@ -1,4 +1,3 @@
-# interface/tela_simulacao.py
 import customtkinter as ctk
 from tkinter import messagebox
 
@@ -83,9 +82,5 @@ class Simulacao:
         self.lista_fechados.pack()
 
     def continuar(self):
-        # Aqui você conecta com sua lógica de busca
         messagebox.showinfo("Ação", "Executar próxima iteração do A*")
-        # Exemplo: atualiza visualmente as células
-        # self.grid_widgets[i][j].configure(fg_color="yellow")
-
-    # Você pode adicionar métodos como `atualizar_grid()`, `atualizar_listas()`, etc.
+      

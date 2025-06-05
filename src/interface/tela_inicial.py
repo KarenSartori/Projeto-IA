@@ -1,4 +1,3 @@
-# interface/tela_inicial.py
 from PIL import Image  
 import customtkinter as ctk
 from interface.tela_simulacao import Simulacao
