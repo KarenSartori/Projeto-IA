@@ -62,6 +62,7 @@ def a_star(inicio, objetivo, mapa):
     closed_set = set()
 
     g = {inicio: 0}
+    deslocamentos = {inicio: 0}
     f = {inicio: calcular_heuristica(inicio, objetivo)}
 
     # caminho funciona como dicioanrio pra guardar os estados e os anteriores dele
@@ -109,17 +110,33 @@ def a_star(inicio, objetivo, mapa):
             # g_novo = g[atual] + custo_real(vizinho)
             # o g é o custo de um estado ao outro
             # g_novo = g[atual] + 1
+            deslocamento_novo = deslocamentos[atual] + 1
             h = calcular_heuristica(vizinho, objetivo, log=True)
-            g_novo = h + 1
+
+            g_novo = deslocamento_novo + h + 1
             f_novo = g_novo + h
 
-            if vizinho not in g or f_novo < f.get(vizinho, float('inf')):
+            if vizinho not in g or g_novo < g[vizinho]:
                 caminho[vizinho] = atual
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
+                deslocamentos[vizinho] = deslocamento_novo
                 contador += 1
                 heapq.heappush(open_list, (f_novo, contador, vizinho))
                 ordem_abertura.append(vizinho)
+
+            #de antes
+            # h = calcular_heuristica(vizinho, objetivo, log=True)
+            # g_novo = h + 1
+            # f_novo = g_novo + h
+
+            # if vizinho not in g or f_novo < f.get(vizinho, float('inf')):
+            #     caminho[vizinho] = atual
+            #     g[vizinho] = g_novo
+            #     f[vizinho] = f_novo
+            #     contador += 1
+            #     heapq.heappush(open_list, (f_novo, contador, vizinho))
+            #     ordem_abertura.append(vizinho)
 
         log("\nLISTA DE OPEN (na ordem de inserção):")
         for cel in ordem_abertura:

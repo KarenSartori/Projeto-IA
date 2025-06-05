@@ -13,10 +13,10 @@ def gerar_mapa():
 
     # Posições aleatórias pra Entrada e Joia
     entrada_pos = posicoes_disponiveis.pop()
-    joia_pos = posicoes_disponiveis.pop()
+    objetivo_pos = posicoes_disponiveis.pop()
 
     matriz[entrada_pos[0]][entrada_pos[1]].adicionar_tipo(TipoCelula.ENTRADA)
-    matriz[joia_pos[0]][joia_pos[1]].adicionar_tipo(TipoCelula.JOIA)
+    matriz[objetivo_pos[0]][objetivo_pos[1]].adicionar_tipo(TipoCelula.JOIA)
 
     tipos_obstaculo = [
         TipoCelula.GUARDA,
@@ -49,8 +49,11 @@ def gerar_mapa():
             tipo = random.choice(tipos_disponiveis)
             celula.adicionar_tipo(tipo)
             contadores[tipo] += 1
+    
+    inicio = matriz[entrada_pos[0]][entrada_pos[1]]
+    objetivo = matriz[objetivo_pos[0]][objetivo_pos[1]]
 
-    return matriz
+    return inicio, objetivo, matriz
 
 def exibir_mapa_console(matriz):
     print("\nMapa (7x7):")
@@ -99,5 +102,5 @@ def exibir_mapa_txt(mapa, caminho=None):
 
     return "\n".join(linhas) + "\n"
 
-mapa = gerar_mapa()
-exibir_mapa_console(mapa)
+inicio, objetivo, mapa = gerar_mapa()
+#exibir_mapa_console(mapa)

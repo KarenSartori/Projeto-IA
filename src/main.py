@@ -1,11 +1,9 @@
-from mapaMedio import gerar_mapa, exibir_mapa_console
+from mapaAleatorio import gerar_mapa, exibir_mapa_console
 from buscador import a_star
 
 if __name__ == "__main__":
-    mapa = gerar_mapa()
-    exibir_mapa_console(mapa)
-
-    inicio = mapa[0][0]
-    objetivo = mapa[6][6]
+    inicio, objetivo, mapa = gerar_mapa()
+    
+    exibir_mapa_console(mapa) #apaga?
 
     caminho = a_star(inicio, objetivo, mapa)
