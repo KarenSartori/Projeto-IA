@@ -61,9 +61,11 @@ def a_star(inicio, objetivo, mapa):
     closed_list = []
     closed_set = set()
 
+    # g = {inicio: 0}
+    # g = {inicio: calcular_heuristica(inicio, objetivo) + 1}
+    # f = {inicio: calcular_heuristica(inicio, objetivo)}
     g = {inicio: 0}
-    deslocamentos = {inicio: 0}
-    f = {inicio: calcular_heuristica(inicio, objetivo)}
+    f = {inicio: 0}
 
     # caminho funciona como dicioanrio pra guardar os estados e os anteriores dele
     # fica tipo { (1,0): (0,0) }
@@ -76,10 +78,15 @@ def a_star(inicio, objetivo, mapa):
 
         log(f"\nVisitando: ({atual.x}, {atual.y})")
         log(f"  - tipos: {', '.join(t.value for t in atual.tipos)}")
-        log(f"  - g(n): {g[atual]}")
-        h_val = calcular_heuristica(atual, objetivo)
-        log(f"  - h(n): {h_val}")
-        log(f"  - f(n): {round(g[atual] + h_val, 1)}")
+
+        if TipoCelula.ENTRADA in atual.tipos:
+            log("Estado Inicial")
+        else:
+            log(f"  - g(n): {g[atual]:.1f}")
+            h_val = calcular_heuristica(atual, objetivo)
+            log(f"  - h(n): {h_val}")
+            log(f"  - f(n): {round(g[atual] + h_val, 1)}")
+
         # add na lista de closed
         closed_list.append(atual)  # visualização
         closed_set.add(atual)  # lógica de controle
@@ -110,40 +117,30 @@ def a_star(inicio, objetivo, mapa):
             # g_novo = g[atual] + custo_real(vizinho)
             # o g é o custo de um estado ao outro
             # g_novo = g[atual] + 1
-            deslocamento_novo = deslocamentos[atual] + 1
-            h = calcular_heuristica(vizinho, objetivo, log=True)
 
-            g_novo = deslocamento_novo + h + 1
-            f_novo = g_novo + h
-
-            if vizinho not in g or g_novo < g[vizinho]:
-                caminho[vizinho] = atual
-                g[vizinho] = g_novo
-                f[vizinho] = f_novo
-                deslocamentos[vizinho] = deslocamento_novo
-                contador += 1
-                heapq.heappush(open_list, (f_novo, contador, vizinho))
-                ordem_abertura.append(vizinho)
-
-            #de antes
             # h = calcular_heuristica(vizinho, objetivo, log=True)
             # g_novo = h + 1
             # f_novo = g_novo + h
 
-            # if vizinho not in g or f_novo < f.get(vizinho, float('inf')):
-            #     caminho[vizinho] = atual
-            #     g[vizinho] = g_novo
-            #     f[vizinho] = f_novo
-            #     contador += 1
-            #     heapq.heappush(open_list, (f_novo, contador, vizinho))
-            #     ordem_abertura.append(vizinho)
+            h_atual = calcular_heuristica(vizinho, objetivo, log=True)
+            g_novo = g[atual] + h_atual + 1
+            f_novo = g_novo + h_atual
+
+            if vizinho not in g or f_novo < f.get(vizinho, float('inf')):
+                caminho[vizinho] = atual
+                g[vizinho] = g_novo
+                f[vizinho] = f_novo
+                contador += 1
+                heapq.heappush(open_list, (f_novo, contador, vizinho))
+                ordem_abertura.append(vizinho)
 
         log("\nLISTA DE OPEN (na ordem de inserção):")
         for cel in ordem_abertura:
             if cel not in closed_set:
                 g_val = g.get(cel, '?')
                 h_val = calcular_heuristica(cel, objetivo)
-                log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val} + {round(h_val, 2)} = {round(g_val + h_val, 2)}")
+                # log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val} + {round(h_val, 2)} = {round(g_val + h_val, 2)}")
+                log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val:.1f} + {h_val:.1f} = {(g_val + h_val):.1f}")
 
         log("LISTA DE CLOSED: " + str([f"({n.x}, {n.y})" for n in closed_list]))
         log("-" * 40)
