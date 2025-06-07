@@ -1,9 +1,9 @@
 import heapq
 import os
 from heuristica.heuristica import calcular_heuristica
-from mapa.mapa import exibir_mapa_txt
+from mapa.mapa_base import exibir_mapa_txt
+from mapa.mapa_base import exibir_mapa_console
 from mapa.celula import TipoCelula
-from mapa.mapa import exibir_mapa_console
 
 # coloquei um arq .txt pra ver se ta certo os calculos
 def log(msg="", end="\n"):

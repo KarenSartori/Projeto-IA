@@ -36,11 +36,12 @@ class Simulacao:
 
         # Parte esquerda que tem o grid e botão
         esquerda = ctk.CTkFrame(container, fg_color="#333333")
-        esquerda.pack(side="right", padx=40, pady=10)
+        esquerda.pack(side="left", padx=40, pady=10)
 
         self.grid = ctk.CTkFrame(esquerda, fg_color="#333333")
         self.grid.pack()
 
+        # Essa parte do código que vê as células 
         for i in range(self.grid_size):
             linha = []
             for j in range(self.grid_size):
