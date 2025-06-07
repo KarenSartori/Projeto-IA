@@ -6,6 +6,7 @@ def iniciar_interface():
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("green")
     
+    # Informações da Janela
     app = ctk.CTk()
     app.geometry("900x600")
     app.title("Agente Secreto com Inteligência Artificial")
