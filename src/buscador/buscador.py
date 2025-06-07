@@ -1,8 +1,7 @@
 import heapq
 import os
 from heuristica.heuristica import calcular_heuristica
-from mapa.mapa_base import exibir_mapa_txt
-from mapa.mapa_base import exibir_mapa_console
+from mapa.mapa_base import exibir_mapa_txt, exibir_mapa_console
 from mapa.celula import TipoCelula
 
 ### Função para registrar logs tanto no terminal quanto em um arquivo .txt
