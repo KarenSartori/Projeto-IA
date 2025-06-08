@@ -10,6 +10,7 @@ TAMANHO_IMAGEM = (60, 60)
 TIPOS_PARA_NOME = {
     frozenset(): "vazio",
     frozenset({"S"}): "agente",
+    frozenset({"E"}): "agente", # Coloquei agente aqui porque ele sempre aparece na entrada...
     frozenset({TipoCelula.JOIA.value}): "joia",
     frozenset({TipoCelula.GUARDA.value}): "guarda",
     frozenset({TipoCelula.CAMERA.value}): "camera",
@@ -42,7 +43,13 @@ def carregar_imagens():
     imagens = {}
     for tipos, nome_arquivo in TIPOS_PARA_NOME.items():
         # Pega o path da imagem
-        caminho = os.path.join(CAMINHO_IMAGENS, f"{nome_arquivo}.png")
-        imagem_pil = Image.open(caminho).resize(TAMANHO_IMAGEM)
+        path = os.path.join(CAMINHO_IMAGENS, f"{nome_arquivo}.png")
+        imagem_pil = Image.open(path).resize(TAMANHO_IMAGEM)
         imagens[tipos] = ctk.CTkImage(dark_image=imagem_pil, size=TAMANHO_IMAGEM)
+
+    # Adiciona a imagem especial do caminho (coloquei aqui porque não é um tipo específico)
+    caminho_img = os.path.join(CAMINHO_IMAGENS, "caminho.png")
+    imagem_caminho = Image.open(caminho_img).resize(TAMANHO_IMAGEM)
+    imagens["caminho"] = ctk.CTkImage(dark_image=imagem_caminho, size=TAMANHO_IMAGEM)
+    
     return imagens

@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from copy import deepcopy
 from interface.imagens_celulas import carregar_imagens
 from mapa.celula import TipoCelula
 from mapa.mapa5x5 import gerar_mapa_5x5
@@ -24,6 +25,10 @@ class Simulacao:
         
         # Cria o mapa de acrodo com o tipo selecionado 
         self.inicio, self.objetivo, self.mapa = self.gerar_mapa_inicial()
+        
+        # Salva o mapa inicial para comparação depois
+        self.mapa_original = deepcopy(self.mapa)
+
         # Inicia o iterator A*
         self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
 
@@ -212,7 +217,15 @@ class Simulacao:
         iniciar_interface()
 
 
-    def continuar(self):
+    def continuar(self):     
+        # Se o estado atual é para mostrar o resultado, aí muda de tela
+        # Só pra não ter que fazer outro botão
+        if self.estado_botao == "mostrar_resultado":
+            self.app.destroy()
+            from interface.tela_resultado import TelaResultado
+            TelaResultado(self.mapa_original, self.mapa_com_caminho)
+            return
+        
         try:
             resultado = next(self.iterator_a_star)
 
@@ -223,16 +236,23 @@ class Simulacao:
             if resultado.get("estado_final"):
                 if resultado.get("caminho_final"):
                     # Mostra o caminho encontrado
-                    for celula in resultado["caminho_final"]:
-                        celula.tipos.add("CAMINHO")
+                    caminho = resultado["caminho_final"]
+                    mapa_com_caminho = deepcopy(self.mapa_original)
+                    for celula in caminho:
+                        mapa_com_caminho[celula.x][celula.y].tipos.add("CAMINHO")
+                    
+                    self.caminho_final = caminho
+                    self.mapa_com_caminho = mapa_com_caminho
                     self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
                     messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
                 else:
+                    self.caminho_final = []
                     messagebox.showinfo("Busca Finalizada", "Não foi possível encontrar um caminho.")
 
                 # Muda o estado do botão para "Finalizado"
                 self.estado_botao = "finalizar"
                 self.atualizar_botao()
+                return
 
             else:
                 self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
@@ -281,11 +301,11 @@ class Simulacao:
             )
         elif self.estado_botao == "finalizar":
             self.btn_continuar.configure(
-                text="✅ FINALIZADO",
-                fg_color="#9E9E9E",  # cinza
-                hover_color="#757575",
-                state="disabled"
+                text="📊 VER RESULTADO",
+                fg_color="#FFC107",  # amarelo
+                hover_color="#FFB300",
             )
+            self.estado_botao = "mostrar_resultado"
 
 
 
