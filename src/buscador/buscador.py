@@ -6,14 +6,14 @@ from mapa.celula import TipoCelula
 
 ### Função para registrar logs tanto no terminal quanto em um arquivo .txt
 def log(msg="", end="\n"):
-    print(msg, end=end) # Imprime no terminal
+    print(msg, end=end) # Imprime a mensagem no terminal
     with open("Resultado_busca.txt", "a", encoding="utf-8") as f:
-        f.write(str(msg) + end) # Escreve no arquivo de log
+        f.write(str(msg) + end) # Escreve a mesma mensagem arquivo de log
 
 ### Calcula o custo real de uma célula baseado nos tipos que ela possui
 def custo_real(celula):
     custo = 0
-    # Soma o custo associado a cada tipo especial da célula
+    # Adiciona/Soma o custo conforme o tipo especial da célula
     for tipo in celula.tipos:
         if tipo == TipoCelula.GUARDA:
             custo += 5
@@ -26,7 +26,7 @@ def custo_real(celula):
     # Garante custo mínimo de 1 para células comuns (default)
     return max(custo, 1)
 
-### Retorna a lista de células vizinhas (acima, abaixo, esquerda, direita)
+### Retorna os vizinhos válidos da célula atual (acima, abaixo, esquerda, direita)
 def get_vizinhos(celula, mapa):
     vizinhos = []
     # Movimentos possíveis nas 4 direções
@@ -52,6 +52,7 @@ def reconstruir_caminho(caminho, atual):
 
 
 ### ALGORITMO A* PRINCIPAL PARA ENCONTRAR O CAMINHO DO INÍCIO AO OBJETIVO
+### Esse é utilizado para mostrar no terminal
 def a_star(inicio, objetivo, mapa):
     # Limpa o arquvio de log no início da execução
     with open("resultado_busca.txt", "w", encoding="utf-8") as f:
@@ -60,7 +61,7 @@ def a_star(inicio, objetivo, mapa):
         f.write(exibir_mapa_txt(mapa))
         f.write("\n")
 
-    open_list = []       # Fila de prioridade para nós a serem explorados
+    open_list = []       # Fila de prioridade com os nós a serem explorados
     ordem_abertura = []  # Para registrar a ordem do s nós abertos
     contador = 0         # Contador para desempate no heapq (quando f(n) igual)
 
@@ -191,12 +192,12 @@ def a_star(inicio, objetivo, mapa):
 # Adicionei essa "versão 2.0" do método acima para não apagar o método
 # e poder usar esse aqui na interface gráfica
 def a_star_iterativo(inicio, objetivo, mapa):
-    open_list = []
-    closed_list = []
-    closed_set = set()
-    g = {inicio: 0}
-    f = {}
-    caminho = {}
+    open_list = []              # Fila de prioridade
+    closed_list = []            # Lista de nós visitados
+    closed_set = set()          # Conjunto rápido para checar visitados
+    g = {inicio: 0}             # g(n)
+    f = {}                      # f(n)
+    caminho = {}                # predecessores
     contador = 0
 
     heapq.heappush(open_list, (0, contador, inicio))
@@ -260,22 +261,23 @@ def a_star_iterativo(inicio, objetivo, mapa):
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
 
-            # Dados completos da heurística
-
+            # Heurística decomposta para visualização detalhada
             # Colocando os pesos aqui para imprimir e também caso precise mudar depois
             peso_risco = 3
             peso_atraso = 2
             peso_dist = 1
 
             adjacentes.append((vizinho.x, vizinho.y, h))
-            heuristicas_adjacentes.append(f"Heurística de ({vizinho.x}, {vizinho.y}) →"
-                              + f" Risco: {risco}"
-                              + f", Atraso: {atraso}"
-                              + f", Distância: {distancia:.1f}:\n"
-                              + f"H(n) = ({peso_risco} * {risco}) + "
-                              + f"({peso_atraso} * {atraso}) + "
-                              + f"({peso_dist} * {distancia:.1f})"
-                              + f" = {round(h, 1)}")
+            heuristicas_adjacentes.append(
+                f"Heurística de ({vizinho.x}, {vizinho.y}) →"
+                + f" Risco: {risco}"
+                + f", Atraso: {atraso}"
+                + f", Distância: {distancia:.1f}:\n"
+                + f"H(n) = ({peso_risco} * {risco}) + "
+                + f"({peso_atraso} * {atraso}) + "
+                + f"({peso_dist} * {distancia:.1f})"
+                + f" = {round(h, 1)}"
+            )
                     
 
         yield {

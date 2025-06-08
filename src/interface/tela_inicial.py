@@ -30,7 +30,7 @@ def iniciar_interface():
     label_img = ctk.CTkLabel(frame, image=img, text="")
     label_img.pack(pady=10)
 
-    # Botões pra seleção de mapa
+    # Cria um frame para os botões de seleção de mapa
     frame_botoes = ctk.CTkFrame(
         frame, 
         fg_color="#1e1e1e",
@@ -40,18 +40,64 @@ def iniciar_interface():
         )
     frame_botoes.pack(pady=10, padx=10)
 
-    # Função para abrir a tela de simulação, ocultando a tela inicial
+    # Função para abrir a tela de simulação de acordo com o tipo de mapa
     def abrir_simulacao(tipo):
-        app.destroy()
-        Simulacao(tipo)
+
+        if tipo == "aleatorio":
+            # Se o tipo for aleatório, cria um pop-up pra escolher o tamanho do mapa
+            def escolher_tamanho(tamanho):
+                popup.destroy()                     # Fecha o pop-up
+                app.destroy()                       # Fecha a janela principal
+                Simulacao("aleatorio", tamanho)     # Inicia a simulação
+            
+            # Criar o pop-up para seleção de tamanho
+            popup = ctk.CTkToplevel(app)
+            popup.title("Escolha o Tamanho do Mapa")
+            popup.geometry("300x200")
+            popup.resizable(False, False)
+            popup.transient(app)    # Mantém acima da janela principal
+            popup.grab_set()        # Bloqueia a jaanel principal até o pop-up ser fechado
+
+            # Centralizar o pop-up
+            app.update_idletasks()
+            x = app.winfo_x() + (app.winfo_width() // 2) - 150
+            y = app.winfo_y() + (app.winfo_height() // 2) - 100
+            popup.geometry(f"+{x}+{y}")
+
+            # Texto do pop-up
+            ctk.CTkLabel(
+                popup, 
+                text="Escolha o tamanho do mapa aleatório:", 
+                font=("Segoe UI", 15, "bold"),
+                text_color="#ffffff"
+            ).pack(pady=(20, 10))
+
+            # Botões para escolher o tamanho
+            for texto, tamanho in [("5 x 5", 5), ("7 x 7", 7), ("8 x 8", 8)]:
+                btn = ctk.CTkButton(
+                    popup,
+                    text=texto,
+                    width=160,
+                    height=40,
+                    corner_radius=12,
+                    font=("Segoe UI", 14),
+                    fg_color="#4CAF50",
+                    hover_color="#45a049",
+                    command=lambda t=tamanho: escolher_tamanho(t)
+                )
+                btn.pack(pady=5)
+        else: 
+            # Para mapas fixos, apenas fecha a tela inicial e abre a simulação
+            app.destroy()
+            Simulacao(tipo)
 
 
-    # Lista dos botões dos mapas
+    # Lista dos botões e seus respectivos tipos de mapa
     botoes = [
         ("Mapa Pequeno (5x5)", "pequeno"),
         ("Mapa Médio (7x7)", "medio"),
         ("Mapa Grande (8x8)", "grande"),
-        ("Mapa Aleatório (7x7)", "aleatorio")
+        ("Mapa Aleatório", "aleatorio")
     ]
 
     # Criando e exibindo os botões de forma estilizada

@@ -6,52 +6,57 @@ from mapa.celula import TipoCelula
 from mapa.mapa5x5 import gerar_mapa_5x5
 from mapa.mapa7x7 import gerar_mapa_7x7
 from mapa.mapa8x8 import gerar_mapa_8x8
-from mapa.mapa7x7_aleatorio import gerar_mapa_aleatorio
+from mapa.mapa_aleatorio import gerar_mapa_aleatorio
 from buscador.buscador import a_star_iterativo
 
 class Simulacao:
-    def __init__(self, tipo_mapa):
+    def __init__(self, tipo_mapa, tamanho_personalizado=None):
         self.tipo_mapa = tipo_mapa
+        self.tamanho_personalizado = tamanho_personalizado
+
         self.app = ctk.CTk()
         self.app.title(f"Simulação A* - Mapa{tipo_mapa.capitalize()}")
         self.app.after(100, lambda: self.app.state("zoomed")) # Garante que a tela em zoom após carregar
         self.app.resizable(False, False)
 
-        self.grid_size = self.definir_tamanho_mapa(tipo_mapa)
-        self.grid_widgets = []
-        self.imagens = carregar_imagens() # Carrega todas as imagens
+        self.grid_size = self.definir_tamanho_mapa(tipo_mapa)  # Define o tamanho do mapa (grid) com base no tipo
+        self.grid_widgets = [] # Guarda os widgets que representam as células na interface
+        self.imagens = carregar_imagens() # Carrega as imagens correspondentes a cada tipo de célula
         
-        self.criar_interface() # Chama para criar o visual
+        self.criar_interface() # Cria a interface visual da simulação
         
-        # Cria o mapa de acrodo com o tipo selecionado 
+        # Gera o mapa inicial e posições do agente e objetivo conforme o tipo selecionado
         self.inicio, self.objetivo, self.mapa = self.gerar_mapa_inicial()
         
-        # Salva o mapa inicial para comparação depois
+        # Salva uma cópia do mapa original para uso posterior (exibição final, comparação, etc.)
         self.mapa_original = deepcopy(self.mapa)
 
-        # Inicia o iterator A*
+        # Cria um iterador para o algoritmo A* para execução passo a passo
         self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
 
+        # Atualiza a interface para mostrar o mapa inicial e o agente na posição inicial
         self.atualizar_grid_com_mapa(self.mapa, self.inicio)
 
-        self.estado_botao = "iniciar" 
+        self.estado_botao = "iniciar" # Estado inicial do botão "Continuar"
         self.atualizar_botao() # Método para atualizar o botão automaticamente
 
         self.app.mainloop() 
 
 
-
-
-
-    # Define o tamanho do grid com base no tipo de mapa selecionado
+    # Define o tamanho da grade do mapa com base no tipo selecionado ou tamanho personalizado
     def definir_tamanho_mapa(self, tipo):
+        if tipo == "aleatorio" and self.tamanho_personalizado is not None:
+            return self.tamanho_personalizado # Retorna tamanho personalizado caso mapa seja aleatório
+
+        # Dicionário com tamanho fixo para os mapas predefinidos
         return {
             "pequeno": 5,
             "medio": 7,
             "grande": 8,
-            "aleatorio": 7  
         }.get(tipo, 7) # Deixei 7 como default
     
+
+    # Gera o mapa inicial e posições do agente e objetivo conforme o tipo de mapa
     def gerar_mapa_inicial(self):
         if self.tipo_mapa == "aleatorio":
             return gerar_mapa_aleatorio(tamanho=self.grid_size)
@@ -66,14 +71,7 @@ class Simulacao:
             self.app.destroy()
 
 
-
-
-
-
-
-
-
-    # Constrói todos os componentes visuais da interface
+    # Cria a interface gráfica com todos os frames, labels, botões e áreas de texto
     def criar_interface(self):
 
         # Container principal
@@ -82,6 +80,7 @@ class Simulacao:
 
 
         # === Parte Direita ===
+        # Área para mostrar listas de abertos, fechados e adjacentes 
         frame_direita = ctk.CTkFrame(container, fg_color="#2b2b2b", corner_radius=15)
         frame_direita.pack(side="right", fill="y", padx=10, pady=10)
 
@@ -136,7 +135,6 @@ class Simulacao:
         # === LIsta de Adjacentes === (Horizontal abaixo dos dois lá de cima)
         frame_adjacentes = ctk.CTkFrame(listas_container, fg_color="#2b2b2b")
         frame_adjacentes.pack(pady=(20, 0)) # Espaço em cima
-
         ctk.CTkLabel(
             frame_adjacentes,
             text="📍 NÓS ABERTOS ADJACENTES DO ESTADO ATUAL:",
@@ -157,6 +155,7 @@ class Simulacao:
 
 
         # === Parte Esquerda ===
+        # Área que exibe o mapa e botões
         frame_esquerda = ctk.CTkFrame(container, fg_color="#2b2b2b", corner_radius=15)
         frame_esquerda.pack(side="left", fill="both", expand=True, padx=5, pady=10)
 
@@ -176,13 +175,13 @@ class Simulacao:
 
         # Subframe centralizado dentro do frame esquerdo
         sub_frame = ctk.CTkFrame(frame_esquerda, fg_color="#2b2b2b")
-        sub_frame.pack(expand=True) # Centraliza essa droga
+        sub_frame.pack(expand=True) # Centraliza
 
         # Grid / Mapa
         self.grid = ctk.CTkFrame(sub_frame, fg_color="#2b2b2b")
         self.grid.pack()
 
-        # Essa parte do código que vê as células 
+        # Cria uma matriz de labels que representam cada célula do mapa visualmente
         for i in range(self.grid_size):
             linha = []
             for j in range(self.grid_size):
@@ -198,7 +197,7 @@ class Simulacao:
                 linha.append(label)
             self.grid_widgets.append(linha)
 
-        # Botão "Continuar"
+        # Botão "Continuar" -> Avançar a simulação
         self.btn_continuar = ctk.CTkButton(
             sub_frame, 
             font=("Segoe UI", 16, "bold"),
@@ -210,6 +209,7 @@ class Simulacao:
         self.btn_continuar.pack(pady=20)
 
     
+    # Fecha a janela atual e abre a tela inicial
     def voltar_tela_inicial(self):
         self.app.destroy() # Fecha a janela atual
         # Abre a tela inicial
@@ -217,6 +217,7 @@ class Simulacao:
         iniciar_interface()
 
 
+    # Executa a próxima iteração do algoritmo A* e atualiza a interface
     def continuar(self):     
         # Se o estado atual é para mostrar o resultado, aí muda de tela
         # Só pra não ter que fazer outro botão
@@ -234,12 +235,14 @@ class Simulacao:
             return
         
         try:
+            # Avança uma etapa do algoritmo A*
             resultado = next(self.iterator_a_star)
 
             if self.estado_botao == "iniciar":
                 self.estado_botao = "continuar"
                 self.atualizar_botao()
 
+            # Caso tenha chegado ao estado final (objetivo alcançado ou falha)
             if resultado.get("estado_final"):
                 if resultado.get("caminho_final"):
 
@@ -253,14 +256,14 @@ class Simulacao:
                     self.caminho_final = caminho
                     self.mapa_com_caminho = mapa_com_caminho
 
+                    # Atualiza a grade para mostrar o agente e nós fechados
                     self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
                     self.atualizar_listas(resultado) # Atualiza a lista com o nó objetivo
 
-                    # Pega as informações
+                    # Salva textos informativos para exibir no resultado final
                     self.texto_caminho_final = resultado.get("caminho_encontrado_texto")
                     self.texto_custo_total = resultado.get("custo_total_texto")
                     self.texto_heuristica = resultado.get("heuristica_texto")
-
 
                     messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
 
@@ -274,15 +277,17 @@ class Simulacao:
                 return
 
             else:
+                # Se ainda está rodando, atualiza o mapa e listas conforme o estado atual
                 self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
                 self.atualizar_listas(resultado)
 
         except StopIteration:
+            # Caso o iterador termine sem retorno final, mostra mensagem e finaliza
             messagebox.showinfo("Busca Concluída", "A busca foi encerrada.")
             self.estado_botao = "finalizar"
             self.atualizar_botao()
 
-
+    # Atualiza visualmente a grade do mapa, mostrando agente, nós fechados e tipos de células com imagens
     def atualizar_grid_com_mapa(self, matriz, agente=None, fechados=None):
         for i in range(len(matriz)):
             for j in range(len(matriz[i])):
@@ -304,7 +309,7 @@ class Simulacao:
                 widget.configure(image=imagem, text="")
                 widget.image = imagem
 
-
+    # Atualiza o texto do botão "Continuar" conforme o estado da simulação
     def atualizar_botao(self):
         if self.estado_botao == "iniciar":
             self.btn_continuar.configure(
@@ -327,7 +332,7 @@ class Simulacao:
             self.estado_botao = "mostrar_resultado"
 
 
-
+    # Atualiza as listas de abertos, fechados e adjacentes na interface
     def atualizar_listas(self, resultado):
         abertos = resultado.get("abertos", [])
         fechados = resultado.get("fechados", [])

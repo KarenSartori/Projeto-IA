@@ -2,14 +2,11 @@ import random
 from mapa.celula import Celula, TipoCelula
 from mapa.mapa_base import exibir_mapa_console, exibir_mapa_txt
 
-TAMANHO = 7 
 
-### Definir:
-#  Permitir escolher o tamanho do mapa?
-#  Permitir escolher a quantidade de obstáculos?
-### Se for definir pode passar por parâmetro nesse método abaixo
+### Nesse método, o usuário pode escolher o tamanho da matriz aleatória 
+# Daria para escolher também o número máximo de obstáculos, mas decidimos colocar 7 mesmo
 
-def gerar_mapa_aleatorio(tamanho = TAMANHO, max_obstaculos_por_tipo = 7):
+def gerar_mapa_aleatorio(tamanho, max_obstaculos_por_tipo = 7):
     matriz = [[Celula(x, y) for y in range(tamanho)] for x in range(tamanho)]
 
     posicoes_disponiveis = [(x, y) for x in range(tamanho) for y in range(tamanho)]
