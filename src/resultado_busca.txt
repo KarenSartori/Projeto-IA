@@ -2,11 +2,11 @@ INÍCIO DA BUSCA A*
 
 Mapa inicial:
 +----+----+----+----+----+
-| D  | G  | GC | P  | .  |
+| E  | G  | CG | P  | .  |
 +----+----+----+----+----+
 | .  | AC | .  | .  | .  |
 +----+----+----+----+----+
-| P  | .  | GC | .  | .  |
+| P  | .  | CG | .  | .  |
 +----+----+----+----+----+
 | C  | .  | A  | G  | .  |
 +----+----+----+----+----+
@@ -15,7 +15,7 @@ Mapa inicial:
 
 
 Visitando: (0, 0)
-  - tipos: D
+  - tipos: E
 Estado Inicial
 
 ADJACENTES DO ESTADO ATUAL:
@@ -26,4 +26,39 @@ LISTA DE OPEN (na ordem de inserção):
   (1, 0) -> f(n) = 6.0 + 5.0 = 11.0
   (0, 1) -> f(n) = 21.0 + 20.0 = 41.0
 LISTA DE CLOSED: ['(0, 0)']
+----------------------------------------
+
+Visitando: (1, 0)
+  - tipos: 
+  - g(n): 6.0
+  - h(n): 5.0
+  - f(n): 11.0
+
+ADJACENTES DO ESTADO ATUAL:
+  (2, 0) -> h(n) = 8.5
+  (1, 1) -> h(n) = 21.2
+
+LISTA DE OPEN (na ordem de inserção):
+  (0, 1) -> f(n) = 21.0 + 20.0 = 41.0
+  (2, 0) -> f(n) = 15.5 + 8.5 = 24.0
+  (1, 1) -> f(n) = 28.2 + 21.2 = 49.4
+LISTA DE CLOSED: ['(0, 0)', '(1, 0)']
+----------------------------------------
+
+Visitando: (2, 0)
+  - tipos: P
+  - g(n): 15.5
+  - h(n): 8.5
+  - f(n): 24.0
+
+ADJACENTES DO ESTADO ATUAL:
+  (2, 1) -> h(n) = 3.6
+  (3, 0) -> h(n) = 13.1
+
+LISTA DE OPEN (na ordem de inserção):
+  (0, 1) -> f(n) = 21.0 + 20.0 = 41.0
+  (1, 1) -> f(n) = 28.2 + 21.2 = 49.4
+  (3, 0) -> f(n) = 29.6 + 13.1 = 42.7
+  (2, 1) -> f(n) = 20.1 + 3.6 = 23.7
+LISTA DE CLOSED: ['(0, 0)', '(1, 0)', '(2, 0)']
 ----------------------------------------

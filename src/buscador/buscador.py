@@ -1,6 +1,6 @@
 import heapq
 import os
-from heuristica.heuristica import calcular_heuristica
+from heuristica.heuristica import calcular_heuristica, decompor_heuristica
 from mapa.mapa_base import exibir_mapa_txt, exibir_mapa_console
 from mapa.celula import TipoCelula
 
@@ -223,10 +223,13 @@ def a_star_iterativo(inicio, objetivo, mapa):
                 "abertos": [item[2] for item in open_list if item[2] not in closed_set],
                 "estado_final": True,
                 "caminho_final": caminho_final,
-                "f_dict": f
+                "f_dict": f,
+                "adjacentes": []
             }
             return
 
+        adjacentes = []
+        heuristicas_adjacentes = []
         for vizinho in get_vizinhos(atual, mapa):
             if vizinho in closed_set:
                 continue
@@ -238,17 +241,39 @@ def a_star_iterativo(inicio, objetivo, mapa):
             contador += 1
             heapq.heappush(open_list, (f_novo, contador, vizinho))
 
+            risco, atraso, distancia = decompor_heuristica(vizinho, objetivo)
+
             if vizinho not in g or g_novo < g[vizinho]:
                 caminho[vizinho] = atual
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
 
+            # Dados completos da heurística
+
+            # Colocando os pesos aqui para imprimir e também caso precise mudar depois
+            peso_risco = 3
+            peso_atraso = 2
+            peso_dist = 1
+
+            adjacentes.append((vizinho.x, vizinho.y, h))
+            heuristicas_adjacentes.append(f"Heurística de ({vizinho.x}, {vizinho.y}) →"
+                              + f" Risco: {risco}"
+                              + f", Atraso: {atraso}"
+                              + f", Distância: {distancia:.1f}:\n"
+                              + f"H(n) = ({peso_risco} * {risco}) + "
+                              + f"({peso_atraso} * {atraso}) + "
+                              + f"({peso_dist} * {distancia:.1f})"
+                              + f" = {round(h, 1)}")
+                    
+
         yield {
             "mapa": mapa,
             "atual": atual,
             "fechados": closed_list.copy(),
-            "abertos": [item[2] for item in open_list if item[20 not in closed_set]],
+            "abertos": [item[2] for item in open_list if item[2] not in closed_set],
             "estado_final": False,
             "caminho_final": None,
-            "f_dict": f
+            "f_dict": f,
+            "adjacentes": adjacentes,
+            "heuristicas_adjacentes": heuristicas_adjacentes 
         }

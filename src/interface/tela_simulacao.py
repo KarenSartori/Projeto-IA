@@ -78,13 +78,16 @@ class Simulacao:
         frame_direita = ctk.CTkFrame(container, fg_color="#2b2b2b", corner_radius=15)
         frame_direita.pack(side="right", fill="y", padx=10, pady=10)
 
-        # Container que tem as duas listas
+        # Container vertical para empilhar as listas e os adjacentes
         listas_container = ctk.CTkFrame(frame_direita, fg_color="#2b2b2b")
-        listas_container.pack(padx=10)
+        listas_container.pack(padx=10, pady=10, fill="y", expand=True)
 
+        # Subcontainer com listas de abertos e fechados lado a lado
+        listas_superiores = ctk.CTkFrame(listas_container, fg_color="#2b2b2b")
+        listas_superiores.pack()
 
         # === Lista de Abertos ===
-        frame_abertos = ctk.CTkFrame(listas_container, fg_color="#2b2b2b")
+        frame_abertos = ctk.CTkFrame(listas_superiores, fg_color="#2b2b2b")
         frame_abertos.pack(side="left", padx=10)
         ctk.CTkLabel(
             frame_abertos, 
@@ -104,7 +107,7 @@ class Simulacao:
 
 
         # === Lista de Fechados ===
-        frame_fechados = ctk.CTkFrame(listas_container, fg_color="#2b2b2b")
+        frame_fechados = ctk.CTkFrame(listas_superiores, fg_color="#2b2b2b")
         frame_fechados.pack(side="left", padx=10)
         ctk.CTkLabel(
             frame_fechados,
@@ -121,6 +124,28 @@ class Simulacao:
             fg_color="#3a3a3a"
         )
         self.lista_fechados.pack()
+
+
+        # === LIsta de Adjacentes === (Horizontal abaixo dos dois lá de cima)
+        frame_adjacentes = ctk.CTkFrame(listas_container, fg_color="#2b2b2b")
+        frame_adjacentes.pack(pady=(20, 0)) # Espaço em cima
+
+        ctk.CTkLabel(
+            frame_adjacentes,
+            text="📍 NÓS ABERTOS ADJACENTES DO ESTADO ATUAL:",
+            font=("Segoe UI", 18, "bold"),
+            text_color="#ffffff"
+        ).pack(pady=5)
+
+        self.lista_adjacentes = ctk.CTkTextbox(
+            frame_adjacentes,
+            width=470,
+            height=150,
+            font=("Segoe UI", 14),
+            text_color="#ffffff",
+            fg_color="#3a3a3a"
+        )
+        self.lista_adjacentes.pack()
 
 
 
@@ -212,15 +237,21 @@ class Simulacao:
         abertos = resultado.get("abertos", [])
         fechados = resultado.get("fechados", [])
         f_dict = resultado.get("f_dict", {})  # Pega o f(n) dos resultados
+        adjacentes = resultado.get("adjacentes", [])
+        heuristicas_texto = "\n".join(resultado.get("heuristicas_adjacentes", []))
 
-        # Formata texto para mostrar os abertos e os fechados
-        texto_abertos = "\n".join(
-            f"({n.x}, {n.y}) |  F(n) = {f_dict[n]:.1f}" for n in abertos if n in f_dict
-        )
+        # Formata os textos
+        texto_abertos = "\n".join(f"({n.x}, {n.y})  |  F(n) = {f_dict[n]:.1f}" for n in abertos if n in f_dict)
         texto_fechados = "\n".join(f"({n.x}, {n.y})" for n in fechados)
+        texto_adjacentes = "\n".join(f"({x}, {y}) --→ h(n) = {h:.1f}" for x, y, h in sorted(adjacentes, key=lambda x: x[2]))
 
+        # Atualiza os campos na interface
         self.lista_abertos.delete("1.0", "end")
         self.lista_abertos.insert("1.0", texto_abertos)
 
         self.lista_fechados.delete("1.0", "end")
         self.lista_fechados.insert("1.0", texto_fechados)
+
+        self.lista_adjacentes.delete("1.0", "end")
+        self.lista_adjacentes.insert("1.0", texto_adjacentes)
+        self.lista_adjacentes.insert("end", "\n\n" + heuristicas_texto)

@@ -54,3 +54,10 @@ def calcular_heuristica(celula, objetivo, log=False):
               f"-> h(n) = {x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)} = {round(h, 1)}")
 
     return round(h, 1)
+
+### Função auxiliar para o buscador para mostrar o cálculo da heurística na interface
+def decompor_heuristica(celula, objetivo):
+    risco = calcular_risco(celula)
+    atraso = calcular_atraso(celula)
+    distancia = distancia_euclidiana(celula.x, celula.y, objetivo.x, objetivo.y)
+    return risco, atraso, distancia
