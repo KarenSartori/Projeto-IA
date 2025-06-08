@@ -2,7 +2,7 @@ import customtkinter as ctk
 from interface.imagens_celulas import carregar_imagens
 
 class TelaResultado:
-    def __init__(self, mapa_original, mapa_com_caminho):
+    def __init__(self, mapa_original, mapa_com_caminho, caminho_final, texto_caminho_final, texto_custo_total, texto_heuristica):
         self.app = ctk.CTk()
         self.app.title("Resultado da Busca A*")
         self.app.after(100, lambda: self.app.state("zoomed"))
@@ -13,11 +13,15 @@ class TelaResultado:
         self.grid_widgets_direita = []
         self.imagens = carregar_imagens()
 
+        self.caminho_final = caminho_final
+        self.texto_caminho = texto_caminho_final
+        self.texto_custo = texto_custo_total
+        self.texto_heuristica = texto_heuristica
+
         self.criar_interface()
 
         self.atualizar_grid(self.grid_widgets_esquerda, mapa_original)
         self.atualizar_grid(self.grid_widgets_direita, mapa_com_caminho, mapa_com_caminho=True)
-
 
         self.app.mainloop()
 
@@ -25,10 +29,13 @@ class TelaResultado:
         container_principal = ctk.CTkFrame(self.app, fg_color="#1f1f1f")
         container_principal.pack(fill="both", expand=True, padx=20, pady=20)
 
-        frame_esquerda = ctk.CTkFrame(container_principal, fg_color="#2b2b2b", corner_radius=15)
+        container_superior = ctk.CTkFrame(container_principal, fg_color="#1f1f1f")
+        container_superior.pack(side="top", fill="both", expand=True)
+
+        frame_esquerda = ctk.CTkFrame(container_superior, fg_color="#2b2b2b", corner_radius=15)
         frame_esquerda.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-        frame_direita = ctk.CTkFrame(container_principal, fg_color="#2b2b2b", corner_radius=15)
+        frame_direita = ctk.CTkFrame(container_superior, fg_color="#2b2b2b", corner_radius=15)
         frame_direita.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
         ctk.CTkLabel(frame_esquerda, text="🔍 MAPA INICIAL", font=("Segoe UI", 20, "bold"), text_color="#ffffff").pack(pady=10)
@@ -55,6 +62,45 @@ class TelaResultado:
             self.grid_widgets_esquerda.append(linha_e)
             self.grid_widgets_direita.append(linha_d)
 
+        # Barra inferior com infos do caminho e botão
+        barra_inferior = ctk.CTkFrame(container_principal, fg_color="#292929")
+        barra_inferior.pack(side="bottom", fill="x", padx=10, pady=10)
+
+        info_texto = self.gerar_texto_info()
+        self.label_info = ctk.CTkLabel(
+            barra_inferior, 
+            text=info_texto, 
+            text_color="#ffffff", 
+            anchor="w", 
+            font=("Segoe UI", 16),
+            wraplength=1000,
+            justify="left"
+        )
+        self.label_info.pack(side="left", padx=35, pady=30, expand=True)
+
+        botao_finalizar = ctk.CTkButton(
+            barra_inferior, 
+            text="🆗 Finalizar",
+            font=("Segoe UI", 16, "bold"),
+            fg_color="#4CAF25",
+            width=120,
+            height=50,
+            corner_radius=10, 
+            command=self.app.destroy)
+        botao_finalizar.pack(side="right", padx=20, pady=10)
+    
+    def gerar_texto_info(self):
+        if not self.caminho_final:
+            return "Nenhum caminho foi encontrado..."
+        
+        # caminho_str = " → ".join(f"({celula.x},{celula.y})" for celula in self.caminho_final)
+        # custo_str = f"Custo total: {self.custo_total}" if self.custo_total is not None else ""
+        # heuristica_str = f"Heurística do início ao objetivo: {self.heuristica}" if self.heuristica is not None else ""
+
+        return f"{self.texto_caminho}\n{self.texto_custo} | {self.texto_heuristica}"
+
+
+
     def atualizar_grid(self, grid_widgets, mapa, mapa_com_caminho=False):
         for i in range(self.grid_size):
             for j in range(self.grid_size):
@@ -69,8 +115,8 @@ class TelaResultado:
                     for t in tipos_brutos
                 )
 
-                # Se for o mapa com caminho e a célula tiver '*', mostra o caminho
-                if mapa_com_caminho and "*" in tipos:
+                # Se for o mapa com caminho mostra as células presentes no caminho
+                if mapa_com_caminho and "CAMINHO" in tipos:
                     imagem = self.imagens["caminho"]
                 else:
                     tipos_frozen = frozenset(tipos)

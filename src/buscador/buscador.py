@@ -215,7 +215,16 @@ def a_star_iterativo(inicio, objetivo, mapa):
         closed_set.add(atual)
 
         if atual == objetivo:
+
             caminho_final = reconstruir_caminho(caminho, atual)
+
+            # Calcula todas as coisas para mandar
+            texto_caminho = "CAMINHO ÓTIMO ENCONTRADO: "
+            texto_caminho += " → ".join(f"({cel.x}, {cel.y})" for cel in caminho_final)
+            
+            texto_custo = f"CUSTO TOTAL: {g[objetivo]}"
+            texto_heuristica = f"HEURÍSTICA ATÉ O OBJETIVO: {calcular_heuristica(inicio, objetivo)}"
+            
             yield {
                 "mapa": mapa,
                 "atual": atual,
@@ -224,7 +233,10 @@ def a_star_iterativo(inicio, objetivo, mapa):
                 "estado_final": True,
                 "caminho_final": caminho_final,
                 "f_dict": f,
-                "adjacentes": []
+                "adjacentes": [],
+                "caminho_encontrado_texto": texto_caminho,
+                "custo_total_texto": texto_custo,
+                "heuristica_texto": texto_heuristica 
             }
             return
 

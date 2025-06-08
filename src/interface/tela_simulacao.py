@@ -223,7 +223,14 @@ class Simulacao:
         if self.estado_botao == "mostrar_resultado":
             self.app.destroy()
             from interface.tela_resultado import TelaResultado
-            TelaResultado(self.mapa_original, self.mapa_com_caminho)
+            TelaResultado(
+                mapa_original=self.mapa_original, 
+                mapa_com_caminho=self.mapa_com_caminho,
+                caminho_final=self.caminho_final,
+                texto_caminho_final=self.texto_caminho_final,
+                texto_custo_total=self.texto_custo_total,
+                texto_heuristica=self.texto_heuristica
+            )
             return
         
         try:
@@ -235,16 +242,28 @@ class Simulacao:
 
             if resultado.get("estado_final"):
                 if resultado.get("caminho_final"):
+
                     # Mostra o caminho encontrado
                     caminho = resultado["caminho_final"]
                     mapa_com_caminho = deepcopy(self.mapa_original)
+
                     for celula in caminho:
                         mapa_com_caminho[celula.x][celula.y].tipos.add("CAMINHO")
                     
                     self.caminho_final = caminho
                     self.mapa_com_caminho = mapa_com_caminho
+
                     self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
+                    self.atualizar_listas(resultado) # Atualiza a lista com o nó objetivo
+
+                    # Pega as informações
+                    self.texto_caminho_final = resultado.get("caminho_encontrado_texto")
+                    self.texto_custo_total = resultado.get("custo_total_texto")
+                    self.texto_heuristica = resultado.get("heuristica_texto")
+
+
                     messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
+
                 else:
                     self.caminho_final = []
                     messagebox.showinfo("Busca Finalizada", "Não foi possível encontrar um caminho.")
