@@ -19,7 +19,7 @@ class Simulacao:
         self.grid_size = self.definir_tamanho_mapa(tipo_mapa)
         self.grid_widgets = []
         self.imagens = carregar_imagens() # Carrega todas as imagens
-
+        
         self.criar_interface() # Chama para criar o visual
         
         # Cria o mapa de acrodo com o tipo selecionado 
@@ -28,6 +28,9 @@ class Simulacao:
         self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
 
         self.atualizar_grid_com_mapa(self.mapa, self.inicio)
+
+        self.estado_botao = "iniciar" 
+        self.atualizar_botao() # Método para atualizar o botão automaticamente
 
         self.app.mainloop() 
 
@@ -71,7 +74,6 @@ class Simulacao:
         # Container principal
         container = ctk.CTkFrame(self.app, fg_color="#1f1f1f")
         container.pack(fill="both", expand=True, padx=20, pady=20)
-
 
 
         # === Parte Direita ===
@@ -153,6 +155,20 @@ class Simulacao:
         frame_esquerda = ctk.CTkFrame(container, fg_color="#2b2b2b", corner_radius=15)
         frame_esquerda.pack(side="left", fill="both", expand=True, padx=5, pady=10)
 
+        # === Botão Voltar ===
+        self.botao_voltar = ctk.CTkButton(
+            frame_esquerda,
+            text="←",
+            width=30,
+            height=40,
+            font=("Segoe UI", 20, "bold"),
+            fg_color="#3a3a3a",
+            hover_color="#555555",
+            corner_radius=50,
+            command=self.voltar_tela_inicial
+        )
+        self.botao_voltar.place(x=20, y=20)
+
         # Subframe centralizado dentro do frame esquerdo
         sub_frame = ctk.CTkFrame(frame_esquerda, fg_color="#2b2b2b")
         sub_frame.pack(expand=True) # Centraliza essa droga
@@ -180,10 +196,6 @@ class Simulacao:
         # Botão "Continuar"
         self.btn_continuar = ctk.CTkButton(
             sub_frame, 
-            text="▶ CONTINUAR", 
-            fg_color="#4CAF50", 
-            hover_color="#43a047",
-            text_color="#ffffff",
             font=("Segoe UI", 16, "bold"),
             width=160,
             height=48,
@@ -192,31 +204,47 @@ class Simulacao:
             )
         self.btn_continuar.pack(pady=20)
 
-        
+    
+    def voltar_tela_inicial(self):
+        self.app.destroy() # Fecha a janela atual
+        # Abre a tela inicial
+        from interface.tela_inicial import iniciar_interface
+        iniciar_interface()
+
 
     def continuar(self):
         try:
             resultado = next(self.iterator_a_star)
+
+            if self.estado_botao == "iniciar":
+                self.estado_botao = "continuar"
+                self.atualizar_botao()
 
             if resultado.get("estado_final"):
                 if resultado.get("caminho_final"):
                     # Mostra o caminho encontrado
                     for celula in resultado["caminho_final"]:
                         celula.tipos.add("CAMINHO")
-                    self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"))
+                    self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
                     messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
                 else:
                     messagebox.showinfo("Busca Finalizada", "Não foi possível encontrar um caminho.")
 
+                # Muda o estado do botão para "Finalizado"
+                self.estado_botao = "finalizar"
+                self.atualizar_botao()
+
             else:
-                self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"))
+                self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"), fechados=resultado.get("fechados", []))
                 self.atualizar_listas(resultado)
 
         except StopIteration:
             messagebox.showinfo("Busca Concluída", "A busca foi encerrada.")
+            self.estado_botao = "finalizar"
+            self.atualizar_botao()
 
 
-    def atualizar_grid_com_mapa(self, matriz, agente=None):
+    def atualizar_grid_com_mapa(self, matriz, agente=None, fechados=None):
         for i in range(len(matriz)):
             for j in range(len(matriz[i])):
                 celula = matriz[i][j]
@@ -224,13 +252,41 @@ class Simulacao:
                 # Se é a posição do agente secreto, mostra a imagem correspondente
                 if agente and (i, j) == (agente.x, agente.y):
                     imagem = self.imagens.get(frozenset({"S"}))
+
+                # Se está na lista de fechados, marca como visitado 
+                elif fechados and any(n.x == i and n.y == j for n in fechados):
+                    imagem = self.imagens.get(frozenset({"X"}))
+
                 else:
                     tipos = frozenset(t.value if isinstance(t, TipoCelula) else t for t in celula.tipos)
                     imagem = self.imagens.get(tipos, self.imagens[frozenset()])
 
                 widget = self.grid_widgets[i][j]
-                widget.configure(image=imagem, text="") # Deixa o texto null e adiciona a Imagem
+                widget.configure(image=imagem, text="")
                 widget.image = imagem
+
+
+    def atualizar_botao(self):
+        if self.estado_botao == "iniciar":
+            self.btn_continuar.configure(
+                text="▶ INICIAR",
+                fg_color="#2196F3",  # azul
+                hover_color="#1e88e5"
+            )
+        elif self.estado_botao == "continuar":
+            self.btn_continuar.configure(
+                text="⏩ CONTINUAR",
+                fg_color="#4CAF50",  # verde
+                hover_color="#43a047"
+            )
+        elif self.estado_botao == "finalizar":
+            self.btn_continuar.configure(
+                text="✅ FINALIZADO",
+                fg_color="#9E9E9E",  # cinza
+                hover_color="#757575",
+                state="disabled"
+            )
+
 
 
     def atualizar_listas(self, resultado):
@@ -255,3 +311,4 @@ class Simulacao:
         self.lista_adjacentes.delete("1.0", "end")
         self.lista_adjacentes.insert("1.0", texto_adjacentes)
         self.lista_adjacentes.insert("end", "\n\n" + heuristicas_texto)
+
