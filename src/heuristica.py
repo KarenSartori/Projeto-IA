@@ -63,9 +63,9 @@ def calcular_heuristica(celula, objetivo, log=False):
 
 #Heuristica inadmissivel 
 def calcular_heuristica_inadmissivel(celula, objetivo, log= False):
-    x = 100
-    y = 100
-    z = 20
+    x = 30
+    y = 20
+    z = 10
     
     risco = calcular_risco(celula)
     atraso = calcular_atraso(celula)
@@ -76,6 +76,7 @@ def calcular_heuristica_inadmissivel(celula, objetivo, log= False):
     if log:
         print(f"[INADMISSÍVEL] Heurística de ({celula.x},{celula.y}): "
               f"risco={risco}, atraso={atraso}, distância={round(distancia,1)} "
-              f"-> h(n) = {x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)} = {round(h, 1)}")
+              f"-> h(n) = 1000 - ({x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)}) = {round(1000-h, 1)}")
 
     return round(1000-h, 1)
+

@@ -1,7 +1,7 @@
 import heapq
 import os
 from heuristica import calcular_heuristica
-from mapa import exibir_mapa_txt, exibir_mapa_console
+from mapaPequeno import exibir_mapa_txt, exibir_mapa_console
 from celula import TipoCelula
 
 #comentar esse import quando for usar heuristica admissivel
@@ -194,7 +194,7 @@ def a_star(inicio, objetivo, mapa):
     ordem_abertura = []
     contador = 0
     heapq.heappush(open_list, (0, contador, inicio))
-    ordem_abertura.append((inicio, 0, calcular_heuristica(inicio, objetivo)))
+    ordem_abertura.append((inicio, 0, calcular_heuristica_inadmissivel(inicio, objetivo)))
 
     closed_list = []
     closed_set = set()
@@ -208,8 +208,8 @@ def a_star(inicio, objetivo, mapa):
         (inicio.x, inicio.y): {
             'pai': None,
             'g': 0,
-            'h': calcular_heuristica(inicio, objetivo),
-            'f': calcular_heuristica(inicio, objetivo)
+            'h': calcular_heuristica_inadmissivel(inicio, objetivo),
+            'f': calcular_heuristica_inadmissivel(inicio, objetivo)
         }
     }
 
@@ -224,7 +224,7 @@ def a_star(inicio, objetivo, mapa):
         log(f"  - tipos: {', '.join(t.value for t in atual.tipos)}")
 
         g_atual = g.get(atual, 0)
-        h_val = calcular_heuristica(atual, objetivo)
+        h_val = calcular_heuristica_inadmissivel(atual, objetivo)
         f_val = g_atual + h_val
 
         if TipoCelula.ENTRADA in atual.tipos:
@@ -281,16 +281,16 @@ def a_star(inicio, objetivo, mapa):
         # Imprimir a heuristica
         for x, y, _ in adjacentes_ordenados:
             celula = mapa[x][y]
-            calcular_heuristica(celula, objetivo, log=True) 
+            calcular_heuristica_inadmissivel(celula, objetivo, log=True) 
 
         for vizinho in vizinhos:
             if vizinho in closed_set:
                 continue
 
-            heuristica_admissivel = calcular_heuristica(vizinho,objetivo)
+            heuristica_admissivel = calcular_heuristica(vizinho,objetivo) #g(n) é a heurística admissível + 1
             
             h_atual = calcular_heuristica_inadmissivel(vizinho, objetivo)
-            g_novo = g[atual] + heuristica_admissivel
+            g_novo = g[atual] + heuristica_admissivel + 1
             f_novo = g_novo + h_atual
             
             contador += 1

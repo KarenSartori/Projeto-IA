@@ -31,4 +31,4 @@ def exibir_arvore_restricao(arvore, objetivo=None):
             peso = round(g - arvore[pai]['g'], 1)
             dot.edge(pai_id, pos_id, label=str(peso))
 
-    dot.render('arvore_mapamedio', format='pdf', view=True)
+    dot.render('arvore_mapa', format='pdf', view=True)
