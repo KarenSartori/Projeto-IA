@@ -1,12 +1,13 @@
-#from mapaAleatorio import gerar_mapa, exibir_mapa_console
+# from mapaAleatorio import gerar_mapa, exibir_mapa_console
+#from mapaPequeno import gerar_mapa, exibir_mapa_console
 from mapaMedio import gerar_mapa, exibir_mapa_console
 from buscador import a_star
-from grafo import exibir_arvore_restricao
+from arvore import exibir_arvore
 
 
 if __name__ == "__main__":
     #Gerar mapa aleatorio
-    #inicio, objetivo, mapa = gerar_mapa()
+    # inicio, objetivo, mapa = gerar_mapa()
     
     #Gerar mapa médio
     mapa = gerar_mapa()
@@ -16,5 +17,5 @@ if __name__ == "__main__":
     exibir_mapa_console(mapa) 
 
     caminho, arvore = a_star(inicio, objetivo, mapa)
-    
-    exibir_arvore_restricao(arvore, objetivo)
+
+    exibir_arvore(arvore)

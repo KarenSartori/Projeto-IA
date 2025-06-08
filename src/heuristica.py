@@ -62,4 +62,3 @@ def calcular_heuristica_inadmissivel(celula, objetivo, log= False):
               f"-> h(n) = 1000 - ({x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)}) = {round(1000-h, 1)}")
 
     return round(1000-h, 1)
-
