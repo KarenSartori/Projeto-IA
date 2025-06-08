@@ -1,24 +1,41 @@
 import os
-from PIL import Image, ImageTk
+from PIL import Image
+import customtkinter as ctk
+from mapa.celula import TipoCelula
 
 CAMINHO_IMAGENS = "interface/imagens/"
-TAMANHO_IMAGEM = (45, 45)
+TAMANHO_IMAGEM = (60, 60)
 
 # Mapeia combinações de tipos para nomes de imagem
 TIPOS_PARA_NOME = {
     frozenset(): "vazio",
     frozenset({"S"}): "agente",
-    frozenset({"J"}): "joia",
-    frozenset({"G"}): "guarda",
-    frozenset({"C"}): "camera",
-    frozenset({"P"}): "porta",
-    frozenset({"A"}): "armadilha",
-    frozenset({"G", "A"}): "guarda_armadilha",
-    frozenset({"G", "C"}): "guarda_camera",
-    frozenset({"G", "P"}): "guarda_porta",
-    frozenset({"C", "A"}): "camera_armadilha",
-    frozenset({"C", "P"}): "camera_porta",
-    frozenset({"P", "A"}): "porta_armadilha",
+    frozenset({TipoCelula.JOIA.value}): "joia",
+    frozenset({TipoCelula.GUARDA.value}): "guarda",
+    frozenset({TipoCelula.CAMERA.value}): "camera",
+    frozenset({TipoCelula.PORTA_TRANCADA.value}): "porta",
+    frozenset({TipoCelula.ARMADILHA.value}): "armadilha",
+    frozenset({"X"}) : "visitado",
+
+    # Não sei se tem a possibilidade de vir trocado, mas coloquei por precaução
+    frozenset({TipoCelula.GUARDA.value, TipoCelula.ARMADILHA.value}): "guarda_armadilha",
+    frozenset({TipoCelula.ARMADILHA.value, TipoCelula.GUARDA.value}): "guarda_armadilha",
+
+    frozenset({TipoCelula.GUARDA.value, TipoCelula.CAMERA.value}): "guarda_camera",
+    frozenset({TipoCelula.CAMERA.value, TipoCelula.GUARDA.value}): "guarda_camera",
+    
+    frozenset({TipoCelula.GUARDA.value, TipoCelula.PORTA_TRANCADA.value}): "guarda_porta",
+    frozenset({TipoCelula.PORTA_TRANCADA.value, TipoCelula.GUARDA.value}): "guarda_porta",
+    
+    frozenset({TipoCelula.CAMERA.value, TipoCelula.ARMADILHA.value}): "camera_armadilha",
+    frozenset({TipoCelula.ARMADILHA.value, TipoCelula.CAMERA.value}): "camera_armadilha",
+    
+    frozenset({TipoCelula.CAMERA.value, TipoCelula.PORTA_TRANCADA.value}): "camera_porta",
+    frozenset({TipoCelula.PORTA_TRANCADA.value, TipoCelula.CAMERA.value}): "camera_porta",
+    
+    frozenset({TipoCelula.PORTA_TRANCADA.value, TipoCelula.ARMADILHA.value}): "porta_armadilha",
+    frozenset({TipoCelula.ARMADILHA.value, TipoCelula.PORTA_TRANCADA.value}): "porta_armadilha",
+
 }
 
 def carregar_imagens():
@@ -27,9 +44,5 @@ def carregar_imagens():
         # Pega o path da imagem
         caminho = os.path.join(CAMINHO_IMAGENS, f"{nome_arquivo}.png")
         imagem_pil = Image.open(caminho).resize(TAMANHO_IMAGEM)
-        imagens[tipos] = ImageTk.PhotoImage(imagem_pil)
+        imagens[tipos] = ctk.CTkImage(dark_image=imagem_pil, size=TAMANHO_IMAGEM)
     return imagens
-
-def obter_imagem_para_celula(celula, imagens):
-    tipos = frozenset(t.value for t in celula.tipos)
-    return imagens.get(tipos, imagens[frozenset()])  # padrão: vazio

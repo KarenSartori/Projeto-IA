@@ -184,3 +184,71 @@ def a_star(inicio, objetivo, mapa):
         input("Pressione Enter para continuar...")
 
     return None 
+
+
+
+### VERSÃO ITERATIVA DO A* PARA O USO NA INTERFACE GRÁFICA
+# Adicionei essa "versão 2.0" do método acima para não apagar o método
+# e poder usar esse aqui na interface gráfica
+def a_star_iterativo(inicio, objetivo, mapa):
+    open_list = []
+    closed_list = []
+    closed_set = set()
+    g = {inicio: 0}
+    f = {}
+    caminho = {}
+    contador = 0
+
+    heapq.heappush(open_list, (0, contador, inicio))
+
+    while True:
+        if not open_list:
+            yield {"estado_final": True, "caminho_final": None}  # Caminho não encontrado
+            return
+
+        _, _, atual = heapq.heappop(open_list)
+
+        if atual in closed_set:
+            continue
+
+        closed_list.append(atual)
+        closed_set.add(atual)
+
+        if atual == objetivo:
+            caminho_final = reconstruir_caminho(caminho, atual)
+            yield {
+                "mapa": mapa,
+                "atual": atual,
+                "fechados": closed_list.copy(),
+                "abertos": [item[2] for item in open_list if item[2] not in closed_set],
+                "estado_final": True,
+                "caminho_final": caminho_final,
+                "f_dict": f
+            }
+            return
+
+        for vizinho in get_vizinhos(atual, mapa):
+            if vizinho in closed_set:
+                continue
+
+            h = calcular_heuristica(vizinho, objetivo)
+            g_novo = g[atual] + h + 1
+            f_novo = g_novo + h
+
+            contador += 1
+            heapq.heappush(open_list, (f_novo, contador, vizinho))
+
+            if vizinho not in g or g_novo < g[vizinho]:
+                caminho[vizinho] = atual
+                g[vizinho] = g_novo
+                f[vizinho] = f_novo
+
+        yield {
+            "mapa": mapa,
+            "atual": atual,
+            "fechados": closed_list.copy(),
+            "abertos": [item[2] for item in open_list if item[20 not in closed_set]],
+            "estado_final": False,
+            "caminho_final": None,
+            "f_dict": f
+        }

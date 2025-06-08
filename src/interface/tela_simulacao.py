@@ -1,20 +1,20 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from interface.imagens_celulas import carregar_imagens
+from mapa.celula import TipoCelula
 from mapa.mapa5x5 import gerar_mapa_5x5
 from mapa.mapa7x7 import gerar_mapa_7x7
 from mapa.mapa8x8 import gerar_mapa_8x8
 from mapa.mapa7x7_aleatorio import gerar_mapa_aleatorio
-from buscador.buscador import a_star
+from buscador.buscador import a_star_iterativo
 
 class Simulacao:
     def __init__(self, tipo_mapa):
         self.tipo_mapa = tipo_mapa
         self.app = ctk.CTk()
         self.app.title(f"Simulação A* - Mapa{tipo_mapa.capitalize()}")
-        self.app.geometry("1000x600")
-        # self.app.resizable(False, False) # Mudar para colocar a tela inteira e aumantar o tamanho da matriz porque está meio pequena
-        self.centralizar_janela()
+        self.app.after(100, lambda: self.app.state("zoomed")) # Garante que a tela em zoom após carregar
+        self.app.resizable(False, False)
 
         self.grid_size = self.definir_tamanho_mapa(tipo_mapa)
         self.grid_widgets = []
@@ -24,6 +24,9 @@ class Simulacao:
         
         # Cria o mapa de acrodo com o tipo selecionado 
         self.inicio, self.objetivo, self.mapa = self.gerar_mapa_inicial()
+        # Inicia o iterator A*
+        self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
+
         self.atualizar_grid_com_mapa(self.mapa, self.inicio)
 
         self.app.mainloop() 
@@ -59,12 +62,7 @@ class Simulacao:
 
 
 
-    # Centraliza a janela principal na tela do usuário
-    def centralizar_janela(self):
-        self.app.update_idletasks()
-        x = (self.app.winfo_screenwidth() // 2) - (1000 // 2)
-        y = (self.app.winfo_screenheight() // 2) - (600 // 2)
-        self.app.geometry(f"{1000}x{600}+{x}+{y}")        
+
 
 
     # Constrói todos os componentes visuais da interface
@@ -91,14 +89,14 @@ class Simulacao:
         ctk.CTkLabel(
             frame_abertos, 
             text="🔓 LISTA DE ABERTOS:", 
-            font=("Segoe UI", 15, "bold"),
+            font=("Segoe UI", 18, "bold"),
             text_color="#ffffff"
         ).pack(pady=5)
         self.lista_abertos = ctk.CTkTextbox(
             frame_abertos,
             width=220,
             height=500,
-            font=("Segoe UI", 14),
+            font=("Segoe UI", 16),
             text_color="#ffffff",
             fg_color="#3a3a3a"
         )        
@@ -111,14 +109,14 @@ class Simulacao:
         ctk.CTkLabel(
             frame_fechados,
             text="🔒 LISTA DE FECHADOS",
-            font=("Segoe UI", 15, "bold"),
+            font=("Segoe UI", 18, "bold"),
             text_color="#ffffff"
         ).pack(pady=5)
         self.lista_fechados = ctk.CTkTextbox(
             frame_fechados,
             width=220,
             height=500,
-            font=("Segoe UI", 14),
+            font=("Segoe UI", 16),
             text_color="#ffffff",
             fg_color="#3a3a3a"
         )
@@ -132,7 +130,7 @@ class Simulacao:
 
         # Subframe centralizado dentro do frame esquerdo
         sub_frame = ctk.CTkFrame(frame_esquerda, fg_color="#2b2b2b")
-        sub_frame.place(relx=0.5, rely=0.45, anchor="center") # Centraliza essa droga
+        sub_frame.pack(expand=True) # Centraliza essa droga
 
         # Grid / Mapa
         self.grid = ctk.CTkFrame(sub_frame, fg_color="#2b2b2b")
@@ -145,10 +143,10 @@ class Simulacao:
                 label = ctk.CTkLabel( 
                     self.grid, 
                     text="", 
-                    width=45, 
-                    height=45, 
+                    width=80, 
+                    height=80, 
                     fg_color="#e0e0e0", 
-                    corner_radius=6
+                    corner_radius=10
                 )
                 label.grid(row=i, column=j, padx=2, pady=2)
                 linha.append(label)
@@ -172,8 +170,25 @@ class Simulacao:
         
 
     def continuar(self):
-        ''' Executar a próxima iteração da simulação '''
-        messagebox.showinfo("Ação", "Executar próxima iteração do A*")
+        try:
+            resultado = next(self.iterator_a_star)
+
+            if resultado.get("estado_final"):
+                if resultado.get("caminho_final"):
+                    # Mostra o caminho encontrado
+                    for celula in resultado["caminho_final"]:
+                        celula.tipos.add("CAMINHO")
+                    self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"))
+                    messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
+                else:
+                    messagebox.showinfo("Busca Finalizada", "Não foi possível encontrar um caminho.")
+
+            else:
+                self.atualizar_grid_com_mapa(self.mapa, agente=resultado.get("atual"))
+                self.atualizar_listas(resultado)
+
+        except StopIteration:
+            messagebox.showinfo("Busca Concluída", "A busca foi encerrada.")
 
 
     def atualizar_grid_com_mapa(self, matriz, agente=None):
@@ -185,9 +200,27 @@ class Simulacao:
                 if agente and (i, j) == (agente.x, agente.y):
                     imagem = self.imagens.get(frozenset({"S"}))
                 else:
-                    tipos = frozenset(t.value for t in celula.tipos)
+                    tipos = frozenset(t.value if isinstance(t, TipoCelula) else t for t in celula.tipos)
                     imagem = self.imagens.get(tipos, self.imagens[frozenset()])
 
                 widget = self.grid_widgets[i][j]
                 widget.configure(image=imagem, text="") # Deixa o texto null e adiciona a Imagem
                 widget.image = imagem
+
+
+    def atualizar_listas(self, resultado):
+        abertos = resultado.get("abertos", [])
+        fechados = resultado.get("fechados", [])
+        f_dict = resultado.get("f_dict", {})  # Pega o f(n) dos resultados
+
+        # Formata texto para mostrar os abertos e os fechados
+        texto_abertos = "\n".join(
+            f"({n.x}, {n.y}) |  F(n) = {f_dict[n]:.1f}" for n in abertos if n in f_dict
+        )
+        texto_fechados = "\n".join(f"({n.x}, {n.y})" for n in fechados)
+
+        self.lista_abertos.delete("1.0", "end")
+        self.lista_abertos.insert("1.0", texto_abertos)
+
+        self.lista_fechados.delete("1.0", "end")
+        self.lista_fechados.insert("1.0", texto_fechados)
