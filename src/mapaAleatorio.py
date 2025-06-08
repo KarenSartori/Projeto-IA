@@ -2,8 +2,6 @@ import random
 from celula import Celula, TipoCelula
 
 TAMANHO = 7 
-# poder escolher o tamanho?
-# se puder escolher a qntd de obstáculos?
 
 def gerar_mapa():
     matriz = [[Celula(x, y) for y in range(TAMANHO)] for x in range(TAMANHO)]
@@ -25,7 +23,7 @@ def gerar_mapa():
         TipoCelula.ARMADILHA
     ]
 
-    contadores = {tipo: 0 for tipo in tipos_obstaculo} # Dict por compressão: mapeia para cada tipo o valor 0, sendo usado para contar quantos obstáculos daquele tipo já foram adicionados
+    contadores = {tipo: 0 for tipo in tipos_obstaculo} 
 
     # Definindo a posição dos obstáculos (7 de cada), com até 2 obstáculos por célula
     for x, y in posicoes_disponiveis:

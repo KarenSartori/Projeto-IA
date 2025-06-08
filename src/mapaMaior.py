@@ -2,7 +2,6 @@ from celula import Celula, TipoCelula
 
 TAMANHO = 8
 
-
 def gerar_mapa():
     matriz = [[Celula(x, y) for y in range(TAMANHO)] for x in range(TAMANHO)]
 

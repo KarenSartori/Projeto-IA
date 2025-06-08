@@ -25,28 +25,11 @@ def custo_real_da_celula(celula):
     atraso = calcular_atraso(celula)
     return round(1 + 3 * risco + 2 * atraso, 1)
 
-# def calcular_heuristica(celula, objetivo):
-#     x = 3  # peso do risco
-#     y = 2  # peso do atraso
-#     z = 1  # peso da distância
-#
-#     risco = calcular_risco(celula)
-#     atraso = calcular_atraso(celula)
-#     distancia = distancia_euclidiana(celula.x, celula.y, objetivo.x, objetivo.y)
-#
-#     h = x * risco + y * atraso + z * distancia
-#
-#     print(f"Heurística de ({celula.x},{celula.y}): "
-#           f"risco={risco}, atraso={atraso}, distância={round(distancia,1)} "
-#           f"-> h(n) = {x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)} = {round(h, 1)}")
-#
-#     return round(h, 1)
-
-
+#Heurística admissível
 def calcular_heuristica(celula, objetivo, log=False):
-    x = 3
-    y = 2  # peso do atraso
-    z = 1  # peso da distância
+    x = 3  #Peso do risco 
+    y = 2  #Peso do atraso
+    z = 1  #Peso da distância
 
     risco = calcular_risco(celula)
     atraso = calcular_atraso(celula)
@@ -61,7 +44,7 @@ def calcular_heuristica(celula, objetivo, log=False):
 
     return round(h, 1)
 
-#Heuristica inadmissivel 
+#Heuristica inadmissível 
 def calcular_heuristica_inadmissivel(celula, objetivo, log= False):
     x = 30
     y = 20

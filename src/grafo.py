@@ -32,3 +32,4 @@ def exibir_arvore_restricao(arvore, objetivo=None):
             dot.edge(pai_id, pos_id, label=str(peso))
 
     dot.render('arvore_mapa', format='pdf', view=True)
+
