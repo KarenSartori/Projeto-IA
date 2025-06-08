@@ -55,6 +55,26 @@ def calcular_heuristica(celula, objetivo, log=False):
 
     return round(h, 1)
 
+#Heuristica não admissível
+# Mudança dos pesos e inversão na lógica: subtraindo o resultado por 1000, os caminhos mais longos possuem menor custo 
+def calcular_heuristica_inadmissivel(celula, objetivo, log= False):
+    x = 30
+    y = 20
+    z = 10
+    
+    risco = calcular_risco(celula)
+    atraso = calcular_atraso(celula)
+    distancia = distancia_euclidiana(celula.x, celula.y, objetivo.x, objetivo.y)
+
+    h = x * risco + y * atraso + z * distancia
+
+    if log:
+        print(f"[INADMISSÍVEL] Heurística de ({celula.x},{celula.y}): "
+              f"risco={risco}, atraso={atraso}, distância={round(distancia,1)} "
+              f"-> h(n) = 1000 - ({x}*{risco} + {y}*{atraso} + {z}*{round(distancia,1)}) = {round(1000-h, 1)}")
+
+    return round(1000-h, 1)
+
 ### Função auxiliar para o buscador para mostrar o cálculo da heurística na interface
 def decompor_heuristica(celula, objetivo):
     risco = calcular_risco(celula)

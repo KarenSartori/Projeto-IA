@@ -1,9 +1,10 @@
 # from mapa.mapa5x5 import gerar_mapa_5x5
 # from mapa.mapa7x7 import gerar_mapa_7x7
 # from mapa.mapa8x8 import gerar_mapa_8x8
-# from mapa.mapa7x7_aleatorio import gerar_mapa_aleatorio
+# from mapa.mapa_aleatorio import gerar_mapa_aleatorio
 # from mapa.mapa_base import exibir_mapa_console
-# from buscador.buscador import a_star
+# from arvore.arvore import exibir_arvore
+# from buscador.buscador import a_star, a_star_inadmissivel
 
 # def escolher_mapa():
 #     print("Escolha o tipo de mapa:")
@@ -29,7 +30,9 @@
     
 #     inicio, objetivo, mapa = escolher_mapa()
 #     exibir_mapa_console(mapa)
-#     caminho = a_star(inicio, objetivo, mapa)
+#     caminho, arvore = a_star(inicio, objetivo, mapa)
+#     #caminho, arvore = a_star_inadmissivel(inicio, objetivo, mapa)
+#     exibir_arvore(arvore)
 
 from interface.tela_inicial import iniciar_interface
 

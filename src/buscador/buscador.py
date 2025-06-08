@@ -1,6 +1,6 @@
 import heapq
 import os
-from heuristica.heuristica import calcular_heuristica, decompor_heuristica
+from heuristica.heuristica import calcular_heuristica, decompor_heuristica, calcular_heuristica_inadmissivel
 from mapa.mapa_base import exibir_mapa_txt, exibir_mapa_console
 from mapa.celula import TipoCelula
 
@@ -50,6 +50,15 @@ def reconstruir_caminho(caminho, atual):
     caminho_final.reverse()         # Inverte para ficar do início ao fim
     return caminho_final
 
+#Exibe o log das listas de aberto e fechado
+def log_open_closed_lists(ordem_abertura, closed_set, closed_list):
+    log("\nLISTA DE OPEN (na ordem de inserção):")
+    for cel, g_val, h_val in ordem_abertura:
+        if cel not in closed_set:
+            log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val:.1f} + {h_val:.1f} = {(g_val + h_val):.1f}")
+
+    log("\nLISTA DE CLOSED: " + str([f"({n.x}, {n.y})" for n in closed_list]))
+    log("-" * 40)
 
 ### ALGORITMO A* PRINCIPAL PARA ENCONTRAR O CAMINHO DO INÍCIO AO OBJETIVO
 ### Esse é utilizado para mostrar no terminal
@@ -75,6 +84,16 @@ def a_star(inicio, objetivo, mapa):
     g = {inicio: 0}      # Custo do caminho desde o início até cada nó
     f = {}               # Custo estimado total (g(n) + h(n))
     caminho = {}         # Armazenar os antecessores dos nós
+
+    arvore_busca = []
+    arvore_busca.append({
+        'x': inicio.x,
+        'y': inicio.y,
+        'pai': None,
+        'g': 0,
+        'h': calcular_heuristica(inicio, objetivo),
+        'f': calcular_heuristica(inicio, objetivo)
+    })
 
     while open_list:
         os.system('cls' if os.name == 'nt' else 'clear') # Limpa o console
@@ -118,6 +137,9 @@ def a_star(inicio, objetivo, mapa):
 
         # Se chegou no objetivo, reconstrói o caminho e finaliza
         if atual == objetivo:
+            log_open_closed_lists(ordem_abertura, closed_set, closed_list)
+            input("Objetivo alcançado! Pressione Enter para exibir o caminho ótimo...")
+
             caminho_final = reconstruir_caminho(caminho, atual)
 
             log("\nCaminho ótimo encontrado:\n")
@@ -134,7 +156,7 @@ def a_star(inicio, objetivo, mapa):
             
             log("\nMapa final da solução com *:")
             log(exibir_mapa_txt(mapa, caminho_final)) # Mostra o mapa com o caminho marcado
-            return caminho_final
+            return caminho_final, arvore_busca
 
         # Obtém os vizinhos do nó atual para expandir
         vizinhos = get_vizinhos(atual, mapa)
@@ -165,28 +187,162 @@ def a_star(inicio, objetivo, mapa):
             heapq.heappush(open_list, (f_novo, contador, vizinho))      # Adiciona na lista de abertos para explorar depois
             ordem_abertura.append((vizinho, g_novo, h_atual))           # Registra a ordem para o log
 
+            arvore_busca.append({
+                'x': vizinho.x,
+                'y': vizinho.y,
+                'pai': (atual.x, atual.y),
+                'g': g_novo,
+                'h': h_atual,
+                'f': f_novo
+            })
+
             # Atualiza o melhor caminho e o custo caso encontrado um caminho mais barato
             if vizinho not in g or g_novo < g[vizinho]:
                 caminho[vizinho] = atual
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
 
-        # Log da lista de abertos com nós ainda para explorar 
-        log("\nLISTA DE OPEN (na ordem de inserção):")
-        for cel, g_val, h_val in ordem_abertura:
-            if cel not in closed_set:
-                log(f"  ({cel.x}, {cel.y}) -> f(n) = {g_val:.1f} + {h_val:.1f} = {(g_val + h_val):.1f}")
-
-        # Log da lista de fechados com os nós já visitados
-        log("LISTA DE CLOSED: " + str([f"({n.x}, {n.y})" for n in closed_list]))
-        log("-" * 40)
+        log_open_closed_lists(ordem_abertura, closed_set, closed_list)
 
         # Pausa para acompanhar cada passo
         input("Pressione Enter para continuar...")
 
-    return None 
+    return None, arvore_busca 
 
 
+#Função com heurística não admissível
+def a_star_inadmissivel(inicio, objetivo, mapa):
+    with open("resultado_busca.txt", "w", encoding="utf-8") as f:
+        f.write("INÍCIO DA BUSCA A*\n\n")
+        f.write("Mapa inicial:\n")
+        f.write(exibir_mapa_txt(mapa))
+        f.write("\n")
+
+    open_list = []
+    ordem_abertura = []
+    contador = 0
+    heapq.heappush(open_list, (0, contador, inicio))
+    ordem_abertura.append((inicio, 0, calcular_heuristica_inadmissivel(inicio, objetivo)))
+
+    closed_list = []
+    closed_set = set()
+
+    g = {inicio: 0}
+    f = {}
+    caminho = {}
+
+    # Inicia a árvore de restrição
+    arvore_busca = []
+    arvore_busca.append({
+        'x': inicio.x,
+        'y': inicio.y,
+        'pai': None,
+        'g': 0,
+        'h': calcular_heuristica_inadmissivel(inicio, objetivo),
+        'f': calcular_heuristica_inadmissivel(inicio, objetivo)
+    })
+    
+
+    while open_list:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        _, _, atual = heapq.heappop(open_list)
+
+        if atual in closed_set:
+            continue
+
+        log(f"\nVisitando: ({atual.x}, {atual.y})")
+        log(f"  - tipos: {', '.join(t.value for t in atual.tipos)}")
+
+        g_atual = g.get(atual, 0)
+        h_val = calcular_heuristica_inadmissivel(atual, objetivo)
+        f_val = g_atual + h_val
+
+        if TipoCelula.ENTRADA in atual.tipos:
+            log("Estado Inicial")
+        else:
+            log(f"  - g(n): {g_atual:.1f}")
+            log(f"  - h(n): {h_val:.1f}")
+            log(f"  - f(n): {f_val:.1f}")
+            
+        closed_list.append(atual)
+        closed_set.add(atual)
+
+        mapa_visual = [["".join(t.value for t in cel.tipos) if cel.tipos else "." for cel in linha] for linha in mapa]
+        for celula in closed_list:
+            mapa_visual[celula.x][celula.y] = "X"
+        mapa_visual[atual.x][atual.y] = "S"
+        exibir_mapa_console(mapa_visual)
+        
+        if atual == objetivo:
+            log_open_closed_lists(ordem_abertura, closed_set, closed_list)
+            input("Objetivo alcançado! Pressione Enter para exibir o caminho encontrado...")
+
+            caminho_final = reconstruir_caminho(caminho, atual)
+            log("\nCaminho encontrado:\n")
+            for i, cel in enumerate(caminho_final):
+                tipos = ', '.join(t.value for t in cel.tipos)
+                log(f"{i + 1:>2}. ({cel.x},{cel.y})  Tipos: {tipos}")
+
+            custo_total = g[objetivo]
+            log(f"\nCusto total da solução (g(n) do estado final): {custo_total}")
+            heuristica_inicio_fim = calcular_heuristica_inadmissivel(inicio, objetivo, log=True)
+            log(f"Heurística: ({inicio.x},{inicio.y}) até o objetivo ({objetivo.x},{objetivo.y}): {heuristica_inicio_fim}")
+            log("\nMapa final da solução com *:")
+            log(exibir_mapa_txt(mapa, caminho_final))
+            return caminho_final, arvore_busca        
+
+        vizinhos = get_vizinhos(atual, mapa)
+
+        heuristicas = []
+        for viz in vizinhos:
+            if viz in closed_set:
+                continue
+            h = calcular_heuristica_inadmissivel(viz, objetivo)
+            heuristicas.append((viz.x, viz.y, h))
+                    
+        
+        log("\nADJACENTES DO ESTADO ATUAL:")
+        adjacentes_ordenados = sorted(heuristicas, key=lambda x: x[2])
+        for x, y, h in adjacentes_ordenados:
+            log(f"  ({x}, {y}) -> h(n) = {round(h, 2)}")
+
+        # Imprimir a heuristica
+        for x, y, _ in adjacentes_ordenados:
+            celula = mapa[x][y]
+            calcular_heuristica_inadmissivel(celula, objetivo, log=True) 
+
+        for vizinho in vizinhos:
+            if vizinho in closed_set:
+                continue
+
+            heuristica_admissivel = calcular_heuristica(vizinho,objetivo) #g(n) é a heurística admissível + 1
+            
+            h_atual = calcular_heuristica_inadmissivel(vizinho, objetivo)
+            g_novo = g[atual] + heuristica_admissivel + 1
+            f_novo = g_novo + h_atual
+            
+            contador += 1
+            heapq.heappush(open_list, (f_novo, contador, vizinho))
+            ordem_abertura.append((vizinho, g_novo, h_atual))
+            
+            arvore_busca.append({
+                'x': vizinho.x,
+                'y': vizinho.y,
+                'pai': (atual.x, atual.y),
+                'g': g_novo,
+                'h': h_atual,
+                'f': f_novo
+            })
+
+            if vizinho not in g or g_novo < g[vizinho]:
+                caminho[vizinho] = atual
+                g[vizinho] = g_novo
+                f[vizinho] = f_novo
+
+        log_open_closed_lists(ordem_abertura, closed_set, closed_list)
+        input("Pressione Enter para continuar...")
+
+    return None, arvore_busca
 
 ### VERSÃO ITERATIVA DO A* PARA O USO NA INTERFACE GRÁFICA
 # Adicionei essa "versão 2.0" do método acima para não apagar o método
