@@ -359,9 +359,19 @@ def a_star_iterativo(inicio, objetivo, mapa):
 
     heapq.heappush(open_list, (0, contador, inicio))
 
+    arvore_busca = []
+    arvore_busca.append({
+        'x': inicio.x,
+        'y': inicio.y,
+        'pai': None,
+        'g': 0,
+        'h': calcular_heuristica(inicio, objetivo),
+        'f': calcular_heuristica(inicio, objetivo)
+    })
+
     while True:
         if not open_list:
-            yield {"estado_final": True, "caminho_final": None}  # Caminho não encontrado
+            yield {"estado_final": True, "caminho_final": None, "arvore_busca": arvore_busca}  # Caminho não encontrado
             return
 
         _, _, atual = heapq.heappop(open_list)
@@ -394,7 +404,8 @@ def a_star_iterativo(inicio, objetivo, mapa):
                 "adjacentes": [],
                 "caminho_encontrado_texto": texto_caminho,
                 "custo_total_texto": texto_custo,
-                "heuristica_texto": texto_heuristica 
+                "heuristica_texto": texto_heuristica,
+                "arvore_busca": arvore_busca
             }
             return
 
@@ -411,6 +422,15 @@ def a_star_iterativo(inicio, objetivo, mapa):
 
             contador += 1
             heapq.heappush(open_list, (f_novo, contador, vizinho))
+
+            arvore_busca.append({
+                'x': vizinho.x,
+                'y': vizinho.y,
+                'pai': (atual.x, atual.y),
+                'g': g_novo,
+                'h': h,
+                'f': f_novo
+            })
 
             risco, atraso, distancia = decompor_heuristica(vizinho, objetivo)
 

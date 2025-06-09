@@ -8,6 +8,7 @@ from mapa.mapa7x7 import gerar_mapa_7x7
 from mapa.mapa8x8 import gerar_mapa_8x8
 from mapa.mapa_aleatorio import gerar_mapa_aleatorio
 from buscador.buscador import a_star_iterativo, a_star_inadmissivel_iterativo
+from arvoreBusca.arvore import exibir_arvore
 
 class Simulacao:
     def __init__(self, tipo_mapa, tamanho_personalizado=None, heuristica_inadmissivel=False):
@@ -227,6 +228,9 @@ class Simulacao:
         # Só pra não ter que fazer outro botão
         if self.estado_botao == "mostrar_resultado":
             self.app.destroy()
+
+            exibir_arvore(self.arvore_busca) # Exibe a árvore de busca
+            
             from interface.tela_resultado import TelaResultado
             TelaResultado(
                 mapa_original=self.mapa_original, 
@@ -268,6 +272,9 @@ class Simulacao:
                     self.texto_caminho_final = resultado.get("caminho_encontrado_texto")
                     self.texto_custo_total = resultado.get("custo_total_texto")
                     self.texto_heuristica = resultado.get("heuristica_texto")
+
+                    # Salva a árvore
+                    self.arvore_busca = resultado.get("arvore_busca")
 
                     messagebox.showinfo("Busca Finalizada", "O agente encontrou o objetivo!")
 
