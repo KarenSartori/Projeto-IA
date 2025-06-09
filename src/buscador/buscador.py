@@ -545,6 +545,9 @@ def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
             g_novo = g[atual] + heuristica_admissivel + 1
             f_novo = g_novo + h_inadmissivel
 
+            contador += 1
+            heapq.heappush(open_list, (f_novo, contador, vizinho))
+
             arvore_busca.append({
                 'x': vizinho.x,
                 'y': vizinho.y,
@@ -560,8 +563,7 @@ def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
                 g[vizinho] = g_novo
                 f[vizinho] = f_novo
                 caminho[vizinho] = atual
-                contador += 1
-                heapq.heappush(open_list, (f_novo, contador, vizinho))
+            
             
             peso_risco = 30
             peso_atraso = 20
