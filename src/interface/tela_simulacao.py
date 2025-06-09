@@ -7,12 +7,13 @@ from mapa.mapa5x5 import gerar_mapa_5x5
 from mapa.mapa7x7 import gerar_mapa_7x7
 from mapa.mapa8x8 import gerar_mapa_8x8
 from mapa.mapa_aleatorio import gerar_mapa_aleatorio
-from buscador.buscador import a_star_iterativo
+from buscador.buscador import a_star_iterativo, a_star_inadmissivel_iterativo
 
 class Simulacao:
-    def __init__(self, tipo_mapa, tamanho_personalizado=None):
+    def __init__(self, tipo_mapa, tamanho_personalizado=None, heuristica_inadmissivel=False):
         self.tipo_mapa = tipo_mapa
         self.tamanho_personalizado = tamanho_personalizado
+        self.heuristica_inadmissivel = heuristica_inadmissivel
 
         self.app = ctk.CTk()
         self.app.title(f"Simulação A* - Mapa{tipo_mapa.capitalize()}")
@@ -31,8 +32,11 @@ class Simulacao:
         # Salva uma cópia do mapa original para uso posterior (exibição final, comparação, etc.)
         self.mapa_original = deepcopy(self.mapa)
 
-        # Cria um iterador para o algoritmo A* para execução passo a passo
-        self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
+        # Cria um iterador para o algoritmo A* com base na heurística escolhida
+        if self.heuristica_inadmissivel:
+            self.iterator_a_star = a_star_inadmissivel_iterativo(self.inicio, self.objetivo, self.mapa)
+        else:
+            self.iterator_a_star = a_star_iterativo(self.inicio, self.objetivo, self.mapa)
 
         # Atualiza a interface para mostrar o mapa inicial e o agente na posição inicial
         self.atualizar_grid_com_mapa(self.mapa, self.inicio)

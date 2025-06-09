@@ -40,15 +40,19 @@ def iniciar_interface():
         )
     frame_botoes.pack(pady=10, padx=10)
 
+    # Variável do checkbox
+    usar_heuristica_inadmissivel = ctk.BooleanVar(value=False)
+
     # Função para abrir a tela de simulação de acordo com o tipo de mapa
     def abrir_simulacao(tipo):
+        inadmissivel = usar_heuristica_inadmissivel.get()
 
         if tipo == "aleatorio":
             # Se o tipo for aleatório, cria um pop-up pra escolher o tamanho do mapa
             def escolher_tamanho(tamanho):
                 popup.destroy()                     # Fecha o pop-up
                 app.destroy()                       # Fecha a janela principal
-                Simulacao("aleatorio", tamanho)     # Inicia a simulação
+                Simulacao("aleatorio", tamanho, inadmissivel)     # Inicia a simulação
             
             # Criar o pop-up para seleção de tamanho
             popup = ctk.CTkToplevel(app)
@@ -89,7 +93,7 @@ def iniciar_interface():
         else: 
             # Para mapas fixos, apenas fecha a tela inicial e abre a simulação
             app.destroy()
-            Simulacao(tipo)
+            Simulacao(tipo, heuristica_inadmissivel=inadmissivel)
 
 
     # Lista dos botões e seus respectivos tipos de mapa
@@ -115,5 +119,17 @@ def iniciar_interface():
             corner_radius=12
             )
         btn.pack(side="left", padx=10, pady=5)
+    
+    # Adicionando o checkbox abaixo dos botões
+    checkbox = ctk.CTkCheckBox(
+        frame,
+        text="Usar A* Não Admissível",
+        variable=usar_heuristica_inadmissivel,
+        font=("Segoe UI", 14, "italic"),
+        fg_color="#A92020",
+        hover_color="#861919",
+        corner_radius=8
+    )
+    checkbox.pack(pady=(5, 10))
 
     app.mainloop()

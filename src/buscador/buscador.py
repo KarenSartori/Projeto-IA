@@ -380,8 +380,8 @@ def a_star_iterativo(inicio, objetivo, mapa):
             texto_caminho = "CAMINHO ÓTIMO ENCONTRADO: "
             texto_caminho += " → ".join(f"({cel.x}, {cel.y})" for cel in caminho_final)
             
-            texto_custo = f"CUSTO TOTAL: {g[objetivo]}"
-            texto_heuristica = f"HEURÍSTICA ATÉ O OBJETIVO: {calcular_heuristica(inicio, objetivo)}"
+            texto_custo = f"CUSTO TOTAL: {g[objetivo]:.1f}"
+            texto_heuristica = f"HEURÍSTICA ATÉ O OBJETIVO: {calcular_heuristica(inicio, objetivo):.1f}"
             
             yield {
                 "mapa": mapa,
@@ -449,3 +449,106 @@ def a_star_iterativo(inicio, objetivo, mapa):
             "adjacentes": adjacentes,
             "heuristicas_adjacentes": heuristicas_adjacentes 
         }
+
+
+### VERSÃO ITERATIVA DO A* *COM HEURÍSTICA NÃO ADMISSÍVEL* PARA O USO NA INTERFACE GRÁFICA
+def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
+    open_list = []
+    closed_list = []
+    closed_set = set()
+    g = {inicio: 0}
+    f = {}
+    caminho = {}
+    contador = 0
+
+    heapq.heappush(open_list, (0, contador, inicio))
+
+    while True:
+        if not open_list:
+            yield {"estado_final": True,"caminho_final": None}
+            return
+
+        _, _, atual = heapq.heappop(open_list)
+
+        if atual in closed_set:
+            continue
+
+        closed_list.append(atual)
+        closed_set.add(atual)
+
+        if atual == objetivo:
+
+            caminho_final = reconstruir_caminho(caminho, atual)
+
+            texto_caminho = "CAMINHO ENCONTRADO (NÃO ÓTIMO): "
+            texto_caminho += " → ".join(f"({cel.x}, {cel.y})" for cel in caminho_final)
+
+            texto_custo = f"CUSTO TOTAL: {g[objetivo]:.1f}"
+            texto_heuristica = f"HEURÍSTICA NÃO ADMISSÍVEL: {calcular_heuristica_inadmissivel(inicio, objetivo):.1f}"
+
+            yield {
+                "mapa": mapa,
+                "atual": atual,
+                "fechados": closed_list.copy(),
+                "abertos": [(item[2], item[0]) for item in open_list if item[2] not in closed_set],
+                "estado_final": True,
+                "caminho_final": caminho_final,
+                "adjacentes": [],
+                "heuristicas_adjacentes": [],
+                "caminho_encontrado_texto": texto_caminho,
+                "custo_total_texto": texto_custo,
+                "heuristica_texto": texto_heuristica
+            }
+            return
+
+        adjacentes = []
+        heuristicas_adjacentes = []
+
+        for vizinho in get_vizinhos(atual, mapa):
+            if vizinho in closed_set:
+                continue
+
+            heuristica_admissivel = calcular_heuristica(vizinho, objetivo)
+
+            h_inadmissivel = calcular_heuristica_inadmissivel(vizinho, objetivo)
+            g_novo = g[atual] + heuristica_admissivel + 1
+            f_novo = g_novo + h_inadmissivel
+            
+            risco, atraso, distancia = decompor_heuristica(vizinho, objetivo)
+
+            if vizinho not in g or g_novo < g[vizinho]:
+                g[vizinho] = g_novo
+                f[vizinho] = f_novo
+                caminho[vizinho] = atual
+                contador += 1
+                heapq.heappush(open_list, (f_novo, contador, vizinho))
+            
+            peso_risco = 30
+            peso_atraso = 20
+            peso_dist = 10
+            
+            adjacentes.append((vizinho.x, vizinho.y, h_inadmissivel))
+            heuristicas_adjacentes.append(
+                f"Heurística NÃO ADMSSÍVEL de ({vizinho.x}, {vizinho.y}) →"
+                + f" Risco: {risco}"
+                + f", Atraso: {atraso}"
+                + f", Distância: {distancia:.1f}:\n"
+                + f"H(n) = 1000 - [({peso_risco} * {risco}) + "
+                + f"({peso_atraso} * {atraso}) + "
+                + f"({peso_dist} * {distancia:.1f})]"
+                + f" = {round(h_inadmissivel, 1)}"
+            
+            )
+
+
+        yield {
+            "mapa": mapa,
+            "atual": atual,
+            "fechados": closed_list.copy(),
+            "abertos": [(item[2], item[0]) for item in open_list if item[2] not in closed_set],
+            "estado_final": False,
+            "caminho_final": None,
+            "adjacentes": adjacentes,
+            "heuristicas_adjacentes": heuristicas_adjacentes
+        }
+    
