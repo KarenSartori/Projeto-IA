@@ -3,7 +3,7 @@ from PIL import Image
 import customtkinter as ctk
 from mapa.celula import TipoCelula
 
-CAMINHO_IMAGENS = "src/interface/imagens/"
+CAMINHO_IMAGENS = "interface/imagens/"
 TAMANHO_IMAGEM = (60, 60)
 
 # Mapeia combinações de tipos para nomes de imagem

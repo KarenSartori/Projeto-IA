@@ -344,6 +344,7 @@ def a_star_inadmissivel(inicio, objetivo, mapa):
 
     return None, arvore_busca
 
+
 ### VERSÃO ITERATIVA DO A* PARA O USO NA INTERFACE GRÁFICA
 # Adicionei essa "versão 2.0" do método acima para não apagar o método
 # e poder usar esse aqui na interface gráfica
@@ -352,7 +353,7 @@ def a_star_iterativo(inicio, objetivo, mapa):
     closed_list = []            # Lista de nós visitados
     closed_set = set()          # Conjunto rápido para checar visitados
     g = {inicio: 0}             # g(n)
-    f = {}                      # f(n)
+    # f = {}                      # f(n)
     caminho = {}                # predecessores
     contador = 0
 
@@ -386,10 +387,10 @@ def a_star_iterativo(inicio, objetivo, mapa):
                 "mapa": mapa,
                 "atual": atual,
                 "fechados": closed_list.copy(),
-                "abertos": [item[2] for item in open_list if item[2] not in closed_set],
+                "abertos": [(item[2], item[0]) for item in open_list if item[2] not in closed_set],
                 "estado_final": True,
                 "caminho_final": caminho_final,
-                "f_dict": f,
+                # "f_dict": f,
                 "adjacentes": [],
                 "caminho_encontrado_texto": texto_caminho,
                 "custo_total_texto": texto_custo,
@@ -399,6 +400,7 @@ def a_star_iterativo(inicio, objetivo, mapa):
 
         adjacentes = []
         heuristicas_adjacentes = []
+        
         for vizinho in get_vizinhos(atual, mapa):
             if vizinho in closed_set:
                 continue
@@ -415,7 +417,7 @@ def a_star_iterativo(inicio, objetivo, mapa):
             if vizinho not in g or g_novo < g[vizinho]:
                 caminho[vizinho] = atual
                 g[vizinho] = g_novo
-                f[vizinho] = f_novo
+                # f[vizinho] = f_novo
 
             # Heurística decomposta para visualização detalhada
             # Colocando os pesos aqui para imprimir e também caso precise mudar depois
@@ -440,10 +442,10 @@ def a_star_iterativo(inicio, objetivo, mapa):
             "mapa": mapa,
             "atual": atual,
             "fechados": closed_list.copy(),
-            "abertos": [item[2] for item in open_list if item[2] not in closed_set],
+            "abertos": [(item[2], item[0]) for item in open_list if item[2] not in closed_set],
             "estado_final": False,
             "caminho_final": None,
-            "f_dict": f,
+            # "f_dict": f,
             "adjacentes": adjacentes,
             "heuristicas_adjacentes": heuristicas_adjacentes 
         }

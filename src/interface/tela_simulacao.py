@@ -17,7 +17,7 @@ class Simulacao:
         self.app = ctk.CTk()
         self.app.title(f"Simulação A* - Mapa{tipo_mapa.capitalize()}")
         self.app.after(100, lambda: self.app.state("zoomed")) # Garante que a tela em zoom após carregar
-        self.app.resizable(False, False)
+        # self.app.resizable(False, False)
 
         self.grid_size = self.definir_tamanho_mapa(tipo_mapa)  # Define o tamanho do mapa (grid) com base no tipo
         self.grid_widgets = [] # Guarda os widgets que representam as células na interface
@@ -334,14 +334,14 @@ class Simulacao:
 
     # Atualiza as listas de abertos, fechados e adjacentes na interface
     def atualizar_listas(self, resultado):
-        abertos = resultado.get("abertos", [])
+        abertos = resultado.get("abertos", []) # Lista de tuplas (Nó, F(n))
         fechados = resultado.get("fechados", [])
-        f_dict = resultado.get("f_dict", {})  # Pega o f(n) dos resultados
+        # f_dict = resultado.get("f_dict", {})  # Pega o f(n) dos resultados
         adjacentes = resultado.get("adjacentes", [])
         heuristicas_texto = "\n".join(resultado.get("heuristicas_adjacentes", []))
 
         # Formata os textos
-        texto_abertos = "\n".join(f"({n.x}, {n.y})  |  F(n) = {f_dict[n]:.1f}" for n in abertos if n in f_dict)
+        texto_abertos = "\n".join(f"({n.x}, {n.y})  |  F(n) = {f:.1f}" for n , f in abertos)
         texto_fechados = "\n".join(f"({n.x}, {n.y})" for n in fechados)
         texto_adjacentes = "\n".join(f"({x}, {y}) --→ h(n) = {h:.1f}" for x, y, h in sorted(adjacentes, key=lambda x: x[2]))
 

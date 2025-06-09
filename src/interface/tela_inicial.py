@@ -25,7 +25,7 @@ def iniciar_interface():
     frame.pack(fill="both", expand=True)
 
     # Imagem de fundo
-    pil_image = Image.open("src/interface/imagens/capa.png")
+    pil_image = Image.open("interface/imagens/capa.png")
     img = ctk.CTkImage(light_image=pil_image, size=(900, 420))
     label_img = ctk.CTkLabel(frame, image=img, text="")
     label_img.pack(pady=10)

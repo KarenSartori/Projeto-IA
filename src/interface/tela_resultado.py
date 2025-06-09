@@ -5,7 +5,7 @@ class TelaResultado:
     def __init__(self, mapa_original, mapa_com_caminho, caminho_final, texto_caminho_final, texto_custo_total, texto_heuristica):
         self.app = ctk.CTk()
         self.app.title("Resultado da Busca A*")
-        self.app.after(100, lambda: self.app.state("-zoomed", True))
+        self.app.after(100, lambda: self.app.state("zoomed"))
         self.app.resizable(False, False)
 
         self.grid_size = len(mapa_original)  # Define o tamanho da grade (matriz) baseada no mapa original
