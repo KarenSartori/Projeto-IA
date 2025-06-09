@@ -483,6 +483,16 @@ def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
 
     heapq.heappush(open_list, (0, contador, inicio))
 
+    arvore_busca = []
+    arvore_busca.append({
+        'x': inicio.x,
+        'y': inicio.y,
+        'pai': None,
+        'g': 0,
+        'h': calcular_heuristica(inicio, objetivo),
+        'f': calcular_heuristica(inicio, objetivo)
+    })
+
     while True:
         if not open_list:
             yield {"estado_final": True,"caminho_final": None}
@@ -517,7 +527,8 @@ def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
                 "heuristicas_adjacentes": [],
                 "caminho_encontrado_texto": texto_caminho,
                 "custo_total_texto": texto_custo,
-                "heuristica_texto": texto_heuristica
+                "heuristica_texto": texto_heuristica,
+                "arvore_busca": arvore_busca
             }
             return
 
@@ -533,6 +544,15 @@ def a_star_inadmissivel_iterativo(inicio, objetivo, mapa):
             h_inadmissivel = calcular_heuristica_inadmissivel(vizinho, objetivo)
             g_novo = g[atual] + heuristica_admissivel + 1
             f_novo = g_novo + h_inadmissivel
+
+            arvore_busca.append({
+                'x': vizinho.x,
+                'y': vizinho.y,
+                'pai': (atual.x, atual.y),
+                'g': g_novo,
+                'h': h_inadmissivel,
+                'f': f_novo
+            })
             
             risco, atraso, distancia = decompor_heuristica(vizinho, objetivo)
 
