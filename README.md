@@ -1,7 +1,7 @@
 <div align="center">
   <h1>🤖 Projeto IA</h1>
   <img src="https://img.shields.io/badge/Tecnologia-Python-blue?style=for-the-badge&logo=python" alt="Python Badge">
-  <img src="https://img.shields.io/badge/Status-Em%20Estudo-informational?style=for-the-badge" alt="Status Badge">
+  <img src="https://img.shields.io/badge/Status-Concluído-success?style=for-the-badge" alt="Status Badge">
 </div>
 
 ---
