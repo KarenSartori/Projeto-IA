@@ -28,16 +28,13 @@ O projeto foi desenvolvido inteiramente em **Python**.
 ---
 
 ### 📂 Estrutura do Repositório
+```
 ├── .idea/                 # Configurações de IDE
-
 ├── arvore                 # Implementação de árvore (código)
-
 ├── arvore.pdf             # Documento explicativo sobre árvores
-
 ├── resultado_busca.txt    # Resultados dos algoritmos de busca
-
 └── src/                   # Código-fonte principal em Python
-
+```
 
 ---
 
